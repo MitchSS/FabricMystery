@@ -1,0 +1,54 @@
+[
+  {
+    "name": "VictimCalendar",
+    "path": "/Tables",
+    "target": {
+      "type": "OneLake",
+      "oneLake": {
+        "path": "Tables/VictimCalendar",
+        "itemId": "02e04bb2-e2bb-8b32-4ff1-ac1aeeb74da7",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "artifactType": "KustoDatabase"
+      }
+    }
+  },
+  {
+    "name": "SupplierRecords",
+    "path": "/Tables",
+    "target": {
+      "type": "OneLake",
+      "oneLake": {
+        "path": "Tables/SupplierRecords",
+        "itemId": "02e04bb2-e2bb-8b32-4ff1-ac1aeeb74da7",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "artifactType": "KustoDatabase"
+      }
+    }
+  },
+  {
+    "name": "SecurityLogs",
+    "path": "/Tables",
+    "target": {
+      "type": "OneLake",
+      "oneLake": {
+        "path": "Tables/SecurityLogs",
+        "itemId": "02e04bb2-e2bb-8b32-4ff1-ac1aeeb74da7",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "artifactType": "KustoDatabase"
+      }
+    }
+  },
+  {
+    "name": "Communications",
+    "path": "/Tables",
+    "target": {
+      "type": "OneLake",
+      "oneLake": {
+        "path": "Tables/Communications",
+        "itemId": "02e04bb2-e2bb-8b32-4ff1-ac1aeeb74da7",
+        "workspaceId": "00000000-0000-0000-0000-000000000000",
+        "artifactType": "KustoDatabase"
+      }
+    }
+  }
+]

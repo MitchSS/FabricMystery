@@ -1,0 +1,76 @@
+table dimevidence
+	lineageTag: b6d03f85-f637-4b26-9dab-0eb3dba25408
+	sourceLineageTag: [dbo].[dimevidence]
+
+	column EvidenceID
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: a99ffb6f-8932-44dc-8f73-a206b71aa0a8
+		sourceLineageTag: EvidenceID
+		summarizeBy: count
+		sourceColumn: EvidenceID
+
+		annotation SummarizationSetBy = Automatic
+
+	column EvidenceName
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: ca8a4019-7da6-42f8-bde4-aa941a83bc2b
+		sourceLineageTag: EvidenceName
+		summarizeBy: none
+		sourceColumn: EvidenceName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Description
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 9d64a6cc-6f1a-4d04-b69e-786d70ee797b
+		sourceLineageTag: Description
+		summarizeBy: none
+		sourceColumn: Description
+
+		annotation SummarizationSetBy = Automatic
+
+	column EvidenceType
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 581c8b82-d4b6-435c-a110-671442199886
+		sourceLineageTag: EvidenceType
+		summarizeBy: none
+		sourceColumn: EvidenceType
+
+		annotation SummarizationSetBy = Automatic
+
+	column InitialLocationID
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 6d5be46e-b822-4ca3-a6ad-ba606ffc99bf
+		sourceLineageTag: InitialLocationID
+		summarizeBy: none
+		sourceColumn: InitialLocationID
+
+		annotation SummarizationSetBy = Automatic
+
+	column RevealedByDialogueID
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 9826b133-fe99-4b8c-8357-f7d70b3dfd70
+		sourceLineageTag: RevealedByDialogueID
+		summarizeBy: count
+		sourceColumn: RevealedByDialogueID
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimevidence = entity
+		mode: directLake
+		source
+			entityName: dimevidence
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

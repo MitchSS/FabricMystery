@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Lakehouse",
+    "displayName": "AetherLH"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "242a477a-ecce-b907-45db-b621e8fe1a33"
+  }
+}

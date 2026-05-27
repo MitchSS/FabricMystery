@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "KQLDatabase",
+    "displayName": "AetherEH",
+    "description": "AetherEH"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "02e04bb2-e2bb-8b32-4ff1-ac1aeeb74da7"
+  }
+}

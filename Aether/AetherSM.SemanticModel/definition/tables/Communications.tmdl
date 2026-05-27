@@ -1,0 +1,84 @@
+table Communications
+	lineageTag: 2908c916-d59c-4fbd-a5ca-c48c2a0db455
+	sourceLineageTag: [dbo].[Communications]
+
+	column Timestamp
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: cef47ce7-c6e1-4e0d-8ef0-53218e740b80
+		sourceLineageTag: Timestamp
+		summarizeBy: none
+		sourceColumn: Timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	column CommsType
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: eb102ffe-180f-49dd-8bff-65d0f8d226ba
+		sourceLineageTag: CommsType
+		summarizeBy: none
+		sourceColumn: CommsType
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sender
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: afe7a5ea-9e46-4886-a00c-e6b8703b392e
+		sourceLineageTag: Sender
+		summarizeBy: none
+		sourceColumn: Sender
+
+		annotation SummarizationSetBy = Automatic
+
+	column Recipient
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 7d4d921a-8a0f-4108-96c9-ca5fecb2e0c6
+		sourceLineageTag: Recipient
+		summarizeBy: none
+		sourceColumn: Recipient
+
+		annotation SummarizationSetBy = Automatic
+
+	column Subject
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 99169452-0b19-4389-a2e8-32eff05a5243
+		sourceLineageTag: Subject
+		summarizeBy: none
+		sourceColumn: Subject
+
+		annotation SummarizationSetBy = Automatic
+
+	column Body
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 214bb3ae-c460-4ca8-9237-7fa0d8d54ee2
+		sourceLineageTag: Body
+		summarizeBy: none
+		sourceColumn: Body
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: e54d5129-ce7b-424b-9aa3-4c5b030d5737
+		sourceLineageTag: Status
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Communications = entity
+		mode: directLake
+		source
+			entityName: Communications
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

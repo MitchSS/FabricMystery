@@ -1,0 +1,53 @@
+{
+  "queryset": {
+    "version": "1.0.0",
+    "dataSources": [
+      {
+        "id": "496de960-9714-41b9-bade-9db54a50e72a",
+        "clusterUri": "https://trd-9xhe2jwmj31ukj1s22.z7.kusto.fabric.microsoft.com",
+        "type": "Fabric",
+        "databaseItemId": "eeb74da7-ac1a-4ff1-8b32-e2bb02e04bb2",
+        "databaseItemName": "AetherEH"
+      },
+      {
+        "id": "7da5910d-b4f5-4efa-acdd-f423c94070c8",
+        "clusterUri": "https://trd-y9vkn1jtfb31r3gze1.z9.kusto.fabric.microsoft.com",
+        "type": "Fabric",
+        "databaseItemId": "05958f79-7f0c-4d52-bc09-5f342149104e",
+        "databaseItemName": "AetherEH"
+      }
+    ],
+    "tabs": [
+      {
+        "id": "04b246ff-f0e6-4840-91ac-da5dff1356bd",
+        "content": "// --- Drop existing tables to ensure a clean start ---\n.drop table SecurityLogs ifexists;\n\n.drop table Communications ifexists;\n\n.drop table VictimCalendar ifexists;\n\n.drop table SupplierRecords ifexists;\n\n// --- Create new tables ---\n\n// SecurityLogs table with PersonID\n.create table SecurityLogs (\n    Timestamp: datetime,\n    PersonID: int,\n    LocationID: int,\n    EventType: string\n);\n\n// Communications table\n.create table Communications (\n    Timestamp: datetime,\n    CommsType: string,\n    Sender: string,\n    Recipient: string,\n    Subject: string,\n    Body: string,\n    Status: string\n);\n\n// VictimCalendar table\n.create table VictimCalendar (\n    StartTime: datetime,\n    EndTime: datetime,\n    Subject: string,\n    Attendees: dynamic,\n    Status: string\n);\n\n// SupplierRecords table\n.create table SupplierRecords (\n    OrderDate: datetime,\n    Supplier: string,\n    ItemCode: string,\n    ItemDescription: string,\n    Quantity: int,\n    Notes: string\n);",
+        "title": "CreateTables",
+        "dataSourceId": "7da5910d-b4f5-4efa-acdd-f423c94070c8"
+      },
+      {
+        "id": "e233e0ea-21f5-4138-bffe-ca666270b844",
+        "content": ".create table SecurityLogs (Timestamp: datetime, CharacterID: int, LocationID: int, EventType: string)\n\n// Step 1: Clear the blank records from the table.\n.clear table SecurityLogs data\n\n// Step 2: Ingest the data again, this time specifying the format as 'psv' (pipe-separated).\n// This is much safer than using tabs.\n.ingest inline into table SecurityLogs with (format = 'psv') <|\n2025-10-06T22:30:15Z|1|101|Access Granted\n2025-10-06T23:55:45Z|3|105|Movement Detected\n2025-10-07T02:15:03Z|2|102|Access Granted\n\n// --- Verification ---\n\n// Step 3: Check that the record count is 3.\nSecurityLogs\n| count\n\n// Step 4: View the actual data, which should now be populated correctly.\nSecurityLogs\n| take 10",
+        "title": "",
+        "dataSourceId": "7da5910d-b4f5-4efa-acdd-f423c94070c8"
+      },
+      {
+        "id": "88367845-3be8-45b3-9174-30bb4c974301",
+        "content": "// ===================================================================\n// KQL Data Load Script for \"The Oracle of Aetherium\"\n// This script will wipe all existing data and load the initial story.\n// ===================================================================\n\n// 1. Clear Existing Data from Tables\n// ------------------------------------\n.clear table SecurityLogs data;\n\n.clear table Communications data;\n\n.clear table VictimCalendar data;\n\n.clear table SupplierRecords data;\n\n// 2. Ingest New Story Data\n// -----------------------------\n\n// Ingest into SecurityLogs\n.ingest inline into table SecurityLogs with (format = 'psv') <|\n2025-10-06T22:30:15Z|1|101|Access Granted\n2025-10-06T23:55:45Z|3|105|Movement Detected\n2025-10-07T02:15:03Z|2|102|Access Granted\n\n\n\n// Ingest into Communications\n.ingest inline into table Communications with (format = 'psv') <|\n\"2025-10-06T22:45:10Z\"|\"TextMessage\"|\"Marcus Thorne\"|\"Julian Croft\"|\"\"|\"You will not erase me. I will ruin you before you ruin me.\"|\"Sent\"\n\"2025-10-06T20:10:00Z\"|\"Email\"|\"Evelyn Reed\"|\"tips@techauditor.com\"|\"The Real Oracle Story\"|\"To whom it may concern, the story of Aetherium's 'Oracle' AI is a lie. Julian Croft's groundbreaking success was built on stolen code, my code. He pushed me out of my own company and...\"|\"Draft\"\n\"2025-10-06T23:40:00Z\"|\"Email\"|\"Julian Croft\"|\"research@medsolutions.com\"|\"Re: Fwd: Alistair Finch - Urgent Request\"|\"We're a go. The projections from Aether are clear. Spare no expense, I'm personally funding the next-stage trials for Dr. Finch. Expedite everything.\"|\"Draft\"\n\n// Ingest into VictimCalendar\n.ingest inline into table VictimCalendar with (format = 'psv') <|\n\"2025-10-06T16:00:00Z\"|\"2025-10-06T17:00:00Z\"|\"Merger Discussion: Aetherium & Nexus Dynamics\"|\"[\\\"Julian Croft\\\", \\\"Anya Sharma\\\"]\"|\"Confirmed\"\n\"2025-10-08T09:00:00Z\"|\"2025-10-08T10:00:00Z\"|\"Follow-up: MedSolutions Experimental Trial Shipment\"|\"[\\\"Julian Croft\\\"]\"|\"Deleted\"\n\n// Ingest into SupplierRecords\n.ingest inline into table SupplierRecords with (format = 'psv') <|\n\"2025-09-12T00:00:00Z\"|\"QuantumChip Co.\"|\"QC-GPU-9980\"|\"GPU Cluster Upgrade\"|32|\"Standard procurement\"\n\"2025-09-15T00:00:00Z\"|\"BioMed Solutions\"|\"EXP-HTD-42\"|\"Experimental Cardiotropic Drug (NDA)\"|1|\"Rush delivery for A.F. Patient confidential.\"\n\nprint \"KQL story data has been successfully loaded.\";",
+        "title": "Populate Tables",
+        "dataSourceId": "7da5910d-b4f5-4efa-acdd-f423c94070c8"
+      },
+      {
+        "id": "0d49f2b5-b07f-46c2-9054-ff31ab733cb8",
+        "content": ".alter-merge table Communications policy mirroring dataformat=parquet with (IsEnabled=true, TargetLatencyInMinutes=5);\n \n.alter-merge table SecurityLogs policy mirroring dataformat=parquet with (IsEnabled=true, TargetLatencyInMinutes=5);\n \n.alter-merge table SupplierRecords policy mirroring dataformat=parquet with (IsEnabled=true, TargetLatencyInMinutes=5);\n \n.alter-merge table VictimCalendar policy mirroring dataformat=parquet with (IsEnabled=true, TargetLatencyInMinutes=5);",
+        "title": "",
+        "dataSourceId": "7da5910d-b4f5-4efa-acdd-f423c94070c8"
+      },
+      {
+        "id": "1e278114-eef8-4bcb-9374-d5bf3996ca2b",
+        "content": ".alter-merge table SecurityLogs policy mirroring dataformat=parquet with (IsEnabled=true, TargetLatencyInMinutes=5);",
+        "title": "",
+        "dataSourceId": "7da5910d-b4f5-4efa-acdd-f423c94070c8"
+      }
+    ]
+  }
+}

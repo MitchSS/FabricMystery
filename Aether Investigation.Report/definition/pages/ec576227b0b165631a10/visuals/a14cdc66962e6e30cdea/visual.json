@@ -1,0 +1,49 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "a14cdc66962e6e30cdea",
+  "position": {
+    "x": 10.8816120906801,
+    "y": 75.264483627204029,
+    "z": 1000,
+    "height": 60.755667506297222,
+    "width": 1269.521410579345,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "At a secluded tech retreat, a visionary billionaire is found dead the morning after unveiling the revolutionary ",
+                    "textStyle": {
+                      "fontFamily": "Tahoma"
+                    }
+                  },
+                  {
+                    "value": "Aether AI",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontFamily": "Tahoma"
+                    }
+                  },
+                  {
+                    "value": ", which can predict human behaviour. The four people closest to him all had a reason to want him dead, and the AI he created may be the only witness.",
+                    "textStyle": {
+                      "fontFamily": "Tahoma"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

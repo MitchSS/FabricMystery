@@ -1,0 +1,111 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "72b12cfb07ae054b0b27",
+  "position": {
+    "x": 10.078740157480315,
+    "y": 0,
+    "z": 0,
+    "height": 131.02362204724409,
+    "width": 1064.3149606299212
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "autoSelectVisualType": true,
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "VictimCalendar"
+                    }
+                  },
+                  "Property": "Status"
+                }
+              },
+              "queryRef": "VictimCalendar.Status",
+              "nativeQueryRef": "Status"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "VictimCalendar"
+                    }
+                  },
+                  "Property": "Subject"
+                }
+              },
+              "queryRef": "VictimCalendar.Subject",
+              "nativeQueryRef": "Subject"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "VictimCalendar"
+                    }
+                  },
+                  "Property": "StartTime"
+                }
+              },
+              "queryRef": "VictimCalendar.StartTime",
+              "nativeQueryRef": "StartTime"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "VictimCalendar"
+                    }
+                  },
+                  "Property": "EndTime"
+                }
+              },
+              "queryRef": "VictimCalendar.EndTime",
+              "nativeQueryRef": "EndTime"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "VictimCalendar"
+                    }
+                  },
+                  "Property": "Attendees"
+                }
+              },
+              "queryRef": "VictimCalendar.Attendees",
+              "nativeQueryRef": "Attendees"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "VictimCalendar"
+                  }
+                },
+                "Property": "Status"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

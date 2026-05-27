@@ -1,0 +1,15 @@
+relationship d19184cd-2008-86fe-ada1-061d5f3fe9fa
+	relyOnReferentialIntegrity
+	fromColumn: SecurityLogs.LocationID
+	toColumn: dimlocation.LocationID
+
+relationship e2817bac-ea84-6b82-9ffb-0af99a55832d
+	relyOnReferentialIntegrity
+	fromColumn: SecurityLogs.PersonID
+	toColumn: dimperson.PersonID
+
+relationship 31d560e0-6c98-3e20-6cde-01a3cba17c45
+	relyOnReferentialIntegrity
+	fromColumn: dimevidence.InitialLocationID
+	toColumn: dimlocation.LocationID
+

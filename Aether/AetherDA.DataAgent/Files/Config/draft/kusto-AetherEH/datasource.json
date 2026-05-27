@@ -1,0 +1,255 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/dataAgent/definition/dataSource/1.0.0/schema.json",
+  "artifactId": "02e04bb2-e2bb-8b32-4ff1-ac1aeeb74da7",
+  "workspaceId": "00000000-0000-0000-0000-000000000000",
+  "dataSourceInstructions": "Always include the Subject and Body when discussing Communications",
+  "displayName": "AetherEH",
+  "type": "kusto",
+  "userDescription": null,
+  "metadata": {},
+  "elements": [
+    {
+      "id": "2eca66d3-f1f3-4a9d-a22b-7327da875f79",
+      "is_selected": true,
+      "display_name": "Communications",
+      "type": "kusto.table",
+      "description": null,
+      "children": [
+        {
+          "id": "Body",
+          "is_selected": true,
+          "display_name": "Body",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "CommsType",
+          "is_selected": true,
+          "display_name": "CommsType",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Recipient",
+          "is_selected": true,
+          "display_name": "Recipient",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Sender",
+          "is_selected": true,
+          "display_name": "Sender",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Status",
+          "is_selected": true,
+          "display_name": "Status",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Subject",
+          "is_selected": true,
+          "display_name": "Subject",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Timestamp",
+          "is_selected": true,
+          "display_name": "Timestamp",
+          "type": "kusto.column",
+          "data_type": "System.DateTime",
+          "description": null,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "b3b08ad4-da7d-426e-bdb9-ee591e23026e",
+      "is_selected": true,
+      "display_name": "SecurityLogs",
+      "type": "kusto.table",
+      "description": null,
+      "children": [
+        {
+          "id": "CharacterID",
+          "is_selected": true,
+          "display_name": "CharacterID",
+          "type": "kusto.column",
+          "data_type": "System.Int32",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "EventType",
+          "is_selected": true,
+          "display_name": "EventType",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "LocationID",
+          "is_selected": true,
+          "display_name": "LocationID",
+          "type": "kusto.column",
+          "data_type": "System.Int32",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "PersonID",
+          "is_selected": true,
+          "display_name": "PersonID",
+          "type": "kusto.column",
+          "data_type": "System.Int32",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Timestamp",
+          "is_selected": true,
+          "display_name": "Timestamp",
+          "type": "kusto.column",
+          "data_type": "System.DateTime",
+          "description": null,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "dfaf4b3b-d65e-4e7a-bf83-fafb74a591d6",
+      "is_selected": true,
+      "display_name": "SupplierRecords",
+      "type": "kusto.table",
+      "description": null,
+      "children": [
+        {
+          "id": "ItemCode",
+          "is_selected": true,
+          "display_name": "ItemCode",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "ItemDescription",
+          "is_selected": true,
+          "display_name": "ItemDescription",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Notes",
+          "is_selected": true,
+          "display_name": "Notes",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "OrderDate",
+          "is_selected": true,
+          "display_name": "OrderDate",
+          "type": "kusto.column",
+          "data_type": "System.DateTime",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Quantity",
+          "is_selected": true,
+          "display_name": "Quantity",
+          "type": "kusto.column",
+          "data_type": "System.Int32",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Supplier",
+          "is_selected": true,
+          "display_name": "Supplier",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        }
+      ]
+    },
+    {
+      "id": "f7e8472c-41a6-4ec8-a901-4c5c6bc8efd2",
+      "is_selected": true,
+      "display_name": "VictimCalendar",
+      "type": "kusto.table",
+      "description": null,
+      "children": [
+        {
+          "id": "Attendees",
+          "is_selected": true,
+          "display_name": "Attendees",
+          "type": "kusto.column",
+          "data_type": "System.Object",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "EndTime",
+          "is_selected": true,
+          "display_name": "EndTime",
+          "type": "kusto.column",
+          "data_type": "System.DateTime",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "StartTime",
+          "is_selected": true,
+          "display_name": "StartTime",
+          "type": "kusto.column",
+          "data_type": "System.DateTime",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Status",
+          "is_selected": true,
+          "display_name": "Status",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        },
+        {
+          "id": "Subject",
+          "is_selected": true,
+          "display_name": "Subject",
+          "type": "kusto.column",
+          "data_type": "System.String",
+          "description": null,
+          "children": []
+        }
+      ]
+    }
+  ]
+}

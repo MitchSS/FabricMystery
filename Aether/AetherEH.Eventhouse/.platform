@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Eventhouse",
+    "displayName": "AetherEH",
+    "description": "AetherEH"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "52d5cf65-0907-9d40-4cf0-0eba06fe85a5"
+  }
+}

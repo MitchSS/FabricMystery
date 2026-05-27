@@ -1,0 +1,65 @@
+table VictimCalendar
+	lineageTag: adcfe08e-3daa-45f0-aaa7-ac5d219b8a3e
+	sourceLineageTag: [dbo].[VictimCalendar]
+
+	column StartTime
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: bf1be891-90f9-4f58-8f1b-f209c444594a
+		sourceLineageTag: StartTime
+		summarizeBy: none
+		sourceColumn: StartTime
+
+		annotation SummarizationSetBy = Automatic
+
+	column EndTime
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 4517293a-ed47-4a76-89fb-efea3d806250
+		sourceLineageTag: EndTime
+		summarizeBy: none
+		sourceColumn: EndTime
+
+		annotation SummarizationSetBy = Automatic
+
+	column Subject
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: b7451b7b-dcbd-40de-9a5e-63bd82909cfe
+		sourceLineageTag: Subject
+		summarizeBy: none
+		sourceColumn: Subject
+
+		annotation SummarizationSetBy = Automatic
+
+	column Attendees
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 7ec6e2d1-c84a-4a15-b4bd-e685fdd8f473
+		sourceLineageTag: Attendees
+		summarizeBy: none
+		sourceColumn: Attendees
+
+		annotation SummarizationSetBy = Automatic
+
+	column Status
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 3165e2de-e439-4288-b623-11ab946d395d
+		sourceLineageTag: Status
+		summarizeBy: none
+		sourceColumn: Status
+
+		annotation SummarizationSetBy = Automatic
+
+	partition VictimCalendar = entity
+		mode: directLake
+		source
+			entityName: VictimCalendar
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

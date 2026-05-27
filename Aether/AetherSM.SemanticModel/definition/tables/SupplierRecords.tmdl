@@ -1,0 +1,75 @@
+table SupplierRecords
+	lineageTag: 6dcee844-2fab-42eb-adf9-2228b08abced
+	sourceLineageTag: [dbo].[SupplierRecords]
+
+	column OrderDate
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: 865cf12e-603e-448a-b5fc-0b3ff039e910
+		sourceLineageTag: OrderDate
+		summarizeBy: none
+		sourceColumn: OrderDate
+
+		annotation SummarizationSetBy = Automatic
+
+	column Supplier
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 5c5e085f-fcb0-4adc-a087-39d36140153f
+		sourceLineageTag: Supplier
+		summarizeBy: none
+		sourceColumn: Supplier
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemCode
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 1ddb7b55-2ee1-427c-a479-45c99730a6e6
+		sourceLineageTag: ItemCode
+		summarizeBy: none
+		sourceColumn: ItemCode
+
+		annotation SummarizationSetBy = Automatic
+
+	column ItemDescription
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 187dfc73-1182-44f6-812d-4a970bc9faf3
+		sourceLineageTag: ItemDescription
+		summarizeBy: none
+		sourceColumn: ItemDescription
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 07ff5c90-b597-4944-bb08-9ef1c2f47474
+		sourceLineageTag: Quantity
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column Notes
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 01ec211e-e023-493e-9c7e-f64223f1630f
+		sourceLineageTag: Notes
+		summarizeBy: none
+		sourceColumn: Notes
+
+		annotation SummarizationSetBy = Automatic
+
+	partition SupplierRecords = entity
+		mode: directLake
+		source
+			entityName: SupplierRecords
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
+

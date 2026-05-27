@@ -1,0 +1,8 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.0.0/schema.json",
+  "name": "dd4b17f10e9d9a4d8c24",
+  "displayName": "Supplier Reconciliation",
+  "displayOption": "FitToPage",
+  "height": 720,
+  "width": 1280
+}

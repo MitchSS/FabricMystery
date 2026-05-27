@@ -1,0 +1,83 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "397532b004284a57764e",
+  "position": {
+    "x": 654.11023622047242,
+    "y": 194.51968503937007,
+    "z": 0,
+    "height": 469.6692913385827,
+    "width": 625.88976377952758
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimevidence"
+                    }
+                  },
+                  "Property": "Description"
+                }
+              },
+              "queryRef": "dimevidence.Description",
+              "nativeQueryRef": "Description"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimevidence"
+                    }
+                  },
+                  "Property": "EvidenceName"
+                }
+              },
+              "queryRef": "dimevidence.EvidenceName",
+              "nativeQueryRef": "EvidenceName"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dimevidence"
+                    }
+                  },
+                  "Property": "EvidenceType"
+                }
+              },
+              "queryRef": "dimevidence.EvidenceType",
+              "nativeQueryRef": "EvidenceType"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "328.6456692913386D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dimevidence.Description"
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Notebook",
+    "displayName": "Rebind Semantic Model"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "f68b7cc2-59fa-a152-4091-b484dc39922a"
+  }
+}

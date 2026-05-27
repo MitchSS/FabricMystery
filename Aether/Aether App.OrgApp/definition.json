@@ -1,0 +1,73 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/orgapp/definition/orgAppDefinition/1.0.0/schema.json",
+  "settings": {
+    "theme": {
+      "background": "#385d75",
+      "foreground": "#ffffff",
+      "backgroundHover": "#2d4a5e",
+      "backgroundSelected": "#223846",
+      "backgroundPressed": "#16252f"
+    },
+    "experienceSettings": {
+      "navigationPane": {
+        "isHidden": false,
+        "isCollapsed": false,
+        "independentPageNavigation": false
+      }
+    }
+  },
+  "elements": [
+    {
+      "elementType": "overview",
+      "elementId": "c2945cbe-6eb3-49e3-ae5b-584a00be8254",
+      "header": {
+        "title": "Welcome to Ghost in the Aether",
+        "body": "A Murder Mystery where you are the detective tasked with solving the crime",
+        "showTheme": true
+      },
+      "displayName": "Overview"
+    },
+    {
+      "elementType": "section",
+      "elementId": "405bc8d6-1ce5-42b7-9279-19e3b2f9889b",
+      "elements": [
+        {
+          "elementType": "item",
+          "elementId": "dba15717-a16d-443e-a089-0f1b1a9e59e3",
+          "itemType": "Report",
+          "itemLogicalId": "43072554-a438-ae05-4e2d-52ead35a094c",
+          "displayName": "Aether Investigation"
+        },
+        {
+          "elementType": "item",
+          "elementId": "155c6696-8c97-4469-894d-e897958aaf97",
+          "itemType": "Report",
+          "itemLogicalId": "0b21d336-ff45-a4a9-4666-113409060d86",
+          "displayName": "Logs"
+        }
+      ],
+      "displayName": "Investigation"
+    },
+    {
+      "elementType": "section",
+      "elementId": "3ca78a8d-de87-4bb6-8161-3f3eac331cd5",
+      "elements": [
+        {
+          "elementType": "link",
+          "elementId": "5fa4c472-6cb4-4f11-b147-3c9593c1af51",
+          "url": "https://msit.powerbi.com/groups/61ade7e2-7daf-48c4-b330-02b33007e4f5/aiskills/9a05a312-12b8-46d6-9dce-829e656baee1?experience=power-bi",
+          "linkType": "newtab",
+          "displayName": "Aether AI"
+        }
+      ],
+      "displayName": "Chat with Aether AI"
+    },
+    {
+      "elementType": "item",
+      "elementId": "253edf7c-f7f2-49ec-b1c3-c02142dc8a4e",
+      "itemType": "SemanticModel",
+      "itemLogicalId": "05fde02e-47e4-960b-450e-36f05e3f7bac",
+      "displayName": "dba15717-a16d-443e-a089-0f1b1a9e59e3"
+    }
+  ]
+}

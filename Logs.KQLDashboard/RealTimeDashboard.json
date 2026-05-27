@@ -1,0 +1,78 @@
+{
+  "schema_version": 63,
+  "tiles": [
+    {
+      "id": "9285cf15-d0cb-4d2c-aafe-a79347b737ad",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "f7e9d718-f54f-4c82-8634-863c3f359b93"
+      },
+      "title": "Communications",
+      "visualType": "table",
+      "pageId": "4ef381a2-5a17-4596-961d-60971132deb8",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 19,
+        "height": 5
+      },
+      "visualOptions": {
+        "table__enableRenderLinks": false,
+        "colorRulesDisabled": true,
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "table__renderLinks": [],
+        "colorRules": []
+      }
+    }
+  ],
+  "baseQueries": [],
+  "parameters": [
+    {
+      "kind": "duration",
+      "id": "58861306-1c94-4b4a-97de-f6d1656e24a9",
+      "displayName": "Time range",
+      "description": "",
+      "beginVariableName": "_startTime",
+      "endVariableName": "_endTime",
+      "defaultValue": {
+        "kind": "dynamic",
+        "count": 1,
+        "unit": "hours"
+      },
+      "showOnPages": {
+        "kind": "all"
+      }
+    }
+  ],
+  "dataSources": [
+    {
+      "id": "1899cf42-a50e-486e-b9f9-5e8016161097",
+      "kind": "kusto-trident",
+      "clusterUri": "",
+      "database": "02e04bb2-e2bb-8b32-4ff1-ac1aeeb74da7",
+      "name": "AetherEH",
+      "scopeId": "kusto-trident",
+      "workspace": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "pages": [
+    {
+      "name": "Page 1",
+      "id": "4ef381a2-5a17-4596-961d-60971132deb8"
+    }
+  ],
+  "queries": [
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "1899cf42-a50e-486e-b9f9-5e8016161097"
+      },
+      "text": "['Communications'] | take 10",
+      "id": "f7e9d718-f54f-4c82-8634-863c3f359b93",
+      "usedVariables": []
+    }
+  ]
+}
