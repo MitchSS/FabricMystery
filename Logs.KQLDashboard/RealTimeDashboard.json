@@ -50,12 +50,10 @@
   "dataSources": [
     {
       "id": "1899cf42-a50e-486e-b9f9-5e8016161097",
-      "kind": "kusto-trident",
-      "clusterUri": "",
-      "database": "02e04bb2-e2bb-8b32-4ff1-ac1aeeb74da7",
-      "name": "AetherEH",
-      "scopeId": "kusto-trident",
-      "workspace": "00000000-0000-0000-0000-000000000000"
+      "kind": "manual-kusto",
+      "clusterUri": "https://trd-5b10duq4wur27gafxk.z7.kusto.fabric.microsoft.com",
+      "database": "AetherEH",
+      "name": "AetherEH"
     }
   ],
   "pages": [
@@ -70,9 +68,12 @@
         "kind": "inline",
         "dataSourceId": "1899cf42-a50e-486e-b9f9-5e8016161097"
       },
-      "text": "['Communications'] | take 10",
+      "text": "['Communications'] | where Timestamp between (_startTime .. _endTime) | extend run_id = tostring(column_ifexists('run_id', 'legacy')) | project Timestamp, CommsType, Sender, Recipient, Subject, Status, run_id | order by Timestamp desc | take 100",
       "id": "f7e9d718-f54f-4c82-8634-863c3f359b93",
-      "usedVariables": []
+      "usedVariables": [
+        "_startTime",
+        "_endTime"
+      ]
     }
   ]
 }
