@@ -1,0 +1,8 @@
+expression DatabaseQuery =
+		let
+			database = Sql.Database("{{LAKEHOUSE_SQL_ENDPOINT}}", "{{LAKEHOUSE_SQL_DB_ID}}")
+		in
+			database
+	lineageTag: 83503bd3-d580-452c-b159-ded15c5c906e
+
+	annotation PBI_IncludeFutureArtifacts = False

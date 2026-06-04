@@ -1,0 +1,24 @@
+model Model
+	culture: en-US
+	collation: Latin1_General_100_BIN2_UTF8
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["DatabaseQuery"]
+
+annotation PBI_ProTooling = ["DaxQueryView_Desktop", "TMDLView_Desktop", "RemoteModeling", "SLL", "WebModelingEdit", "SLL_UpdateDLConnection_SQL"]
+
+annotation __TEdtr = 1
+
+ref table SecurityLogs
+ref table Communications
+ref table VictimCalendar
+ref table SupplierRecords
+ref table dimlocation
+ref table dimevidence
+ref table dimperson

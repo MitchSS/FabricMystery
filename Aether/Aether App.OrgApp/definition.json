@@ -1,0 +1,59 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/orgapp/definition/orgAppDefinition/1.0.0/schema.json",
+  "settings": {
+    "theme": {
+      "background": "#385d75",
+      "foreground": "#ffffff",
+      "backgroundHover": "#2d4a5e",
+      "backgroundSelected": "#223846",
+      "backgroundPressed": "#16252f"
+    },
+    "experienceSettings": {
+      "navigationPane": {
+        "isHidden": false,
+        "isCollapsed": false,
+        "independentPageNavigation": false
+      }
+    }
+  },
+  "elements": [
+    {
+      "elementType": "overview",
+      "elementId": "c2945cbe-6eb3-49e3-ae5b-584a00be8254",
+      "header": {
+        "title": "Welcome to Ghost in the Aether",
+        "body": "A Murder Mystery where you are the detective tasked with solving the crime",
+        "showTheme": true
+      },
+      "displayName": "Overview"
+    },
+    {
+      "elementType": "section",
+      "elementId": "405bc8d6-1ce5-42b7-9279-19e3b2f9889b",
+      "elements": [
+        {
+          "elementType": "item",
+          "elementId": "dba15717-a16d-443e-a089-0f1b1a9e59e3",
+          "itemType": "Report",
+          "itemLogicalId": "{{REPORT_LOGICAL_ID}}",
+          "displayName": "Aether Investigation"
+        }
+      ],
+      "displayName": "Investigation"
+    },
+    {
+      "elementType": "section",
+      "elementId": "3ca78a8d-de87-4bb6-8161-3f3eac331cd5",
+      "elements": [
+        {
+          "elementType": "item",
+          "elementId": "5fa4c472-6cb4-4f11-b147-3c9593c1af51",
+          "itemType": "DataAgent",
+          "itemLogicalId": "{{AGENT_LOGICAL_ID}}",
+          "displayName": "Aether AI"
+        }
+      ],
+      "displayName": "Chat with Aether AI"
+    }
+  ]
+}

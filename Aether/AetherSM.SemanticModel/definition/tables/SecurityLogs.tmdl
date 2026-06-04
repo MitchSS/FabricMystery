@@ -1,0 +1,55 @@
+table SecurityLogs
+	lineageTag: d4f349f8-ad6b-49c7-bf28-8e0c16104b16
+	sourceLineageTag: [dbo].[SecurityLogs]
+
+	column Timestamp
+		dataType: dateTime
+		formatString: General Date
+		sourceProviderType: datetime2
+		lineageTag: ef14b0f2-7a80-4a1c-9122-8a5f01c26de0
+		sourceLineageTag: Timestamp
+		summarizeBy: none
+		sourceColumn: Timestamp
+
+		annotation SummarizationSetBy = Automatic
+
+	column PersonID
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 770be478-a5c9-461f-a91f-b5adbb041b59
+		sourceLineageTag: PersonID
+		summarizeBy: none
+		sourceColumn: PersonID
+
+		annotation SummarizationSetBy = Automatic
+
+	column LocationID
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: af66fad3-0944-49b4-a241-f1f75295185d
+		sourceLineageTag: LocationID
+		summarizeBy: none
+		sourceColumn: LocationID
+
+		annotation SummarizationSetBy = Automatic
+
+	column EventType
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: b200b137-71e7-4b94-8e1b-bedf4902f2f5
+		sourceLineageTag: EventType
+		summarizeBy: none
+		sourceColumn: EventType
+
+		annotation SummarizationSetBy = Automatic
+
+	partition SecurityLogs = entity
+		mode: directLake
+		source
+			entityName: SecurityLogs
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table

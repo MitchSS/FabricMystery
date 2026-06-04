@@ -1,0 +1,63 @@
+// ============================================================
+// Ghost in the Aether — KQL Database Schema
+// Eventhouse: AetherEH | Database: AetherEH
+// ============================================================
+
+// --- Security Logs ---
+// Real-time access events from the Aetherium Estate security system
+.create-merge table SecurityLogs (
+    Timestamp: datetime,
+    PersonID: int,
+    PersonName: string,
+    LocationID: int,
+    LocationName: string,
+    AccessType: string,
+    Details: string,
+    IsSuspicious: bool
+)
+
+// --- Communications ---
+// Intercepted messages between persons of interest
+.create-merge table Communications (
+    Timestamp: datetime,
+    SenderID: int,
+    SenderName: string,
+    ReceiverID: int,
+    ReceiverName: string,
+    Channel: string,
+    MessageSnippet: string,
+    Sentiment: string
+)
+
+// --- VictimCalendar ---
+// Julian Croft's schedule in the 48 hours before his death
+.create-merge table VictimCalendar (
+    Timestamp: datetime,
+    EventTitle: string,
+    LocationID: int,
+    LocationName: string,
+    AttendeesCSV: string,
+    Notes: string
+)
+
+// --- SupplierRecords ---
+// Deliveries and external access to the estate
+.create-merge table SupplierRecords (
+    Timestamp: datetime,
+    SupplierName: string,
+    ItemDelivered: string,
+    ReceivedByPersonID: int,
+    ReceivedByName: string,
+    LocationID: int,
+    Notes: string
+)
+
+// --- Audience Votes ---
+// Live "whodunit" guesses collected from MS Forms during the demo
+.create-merge table Votes (
+    ResponseId: string,
+    Timestamp: datetime,
+    Suspect: string,
+    Confidence: int,
+    Motive: string
+)

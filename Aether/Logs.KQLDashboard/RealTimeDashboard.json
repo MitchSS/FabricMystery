@@ -1,0 +1,121 @@
+{
+  "schema": "RealTimeDashboard",
+  "version": 1,
+  "dataSourcesMetadata": [
+    {
+      "id": "aether-eventhouse",
+      "name": "AetherEH",
+      "kind": "kusto",
+      "clusterUri": "{{EVENTHOUSE_CLUSTER_URI}}",
+      "database": "AetherEH"
+    }
+  ],
+  "pages": [
+    {
+      "id": "page-security",
+      "name": "Security Logs",
+      "tiles": [
+        {
+          "id": "tile-sec-timeline",
+          "title": "Security Events Timeline",
+          "kind": "timechart",
+          "dataSourceId": "aether-eventhouse",
+          "query": "SecurityLogs\n| summarize EventCount = count() by bin(Timestamp, 1m), EventType\n| render timechart",
+          "layout": { "x": 0, "y": 0, "width": 12, "height": 4 }
+        },
+        {
+          "id": "tile-sec-by-person",
+          "title": "Events by Person",
+          "kind": "barchart",
+          "dataSourceId": "aether-eventhouse",
+          "query": "SecurityLogs\n| summarize EventCount = count() by PersonID\n| join kind=inner (print PersonID = dynamic([1,2,3,4,5]), PersonName = dynamic(['Julian Croft','Evelyn Reed','Marcus Thorne','Anya Sharma','Dr. Alistair Finch']) | mv-expand PersonID to typeof(int), PersonName to typeof(string)) on PersonID\n| project PersonName, EventCount\n| render barchart",
+          "layout": { "x": 0, "y": 4, "width": 6, "height": 4 }
+        },
+        {
+          "id": "tile-sec-by-location",
+          "title": "Events by Location",
+          "kind": "piechart",
+          "dataSourceId": "aether-eventhouse",
+          "query": "SecurityLogs\n| summarize EventCount = count() by LocationID\n| extend LocationName = case(\n    LocationID == 101, \"Julian's Study\",\n    LocationID == 102, \"Server Room\",\n    LocationID == 103, \"Evelyn's Suite\",\n    LocationID == 104, \"Marcus's Suite\",\n    LocationID == 105, \"Back Path\",\n    LocationID == 106, \"Dr. Finch's Suite\",\n    \"Unknown\")\n| project LocationName, EventCount\n| render piechart",
+          "layout": { "x": 6, "y": 4, "width": 6, "height": 4 }
+        },
+        {
+          "id": "tile-sec-suspicious",
+          "title": "Suspicious Events",
+          "kind": "table",
+          "dataSourceId": "aether-eventhouse",
+          "query": "SecurityLogs\n| where IsSuspicious == true\n| project Timestamp, PersonName, LocationName, EventType = AccessType, Details\n| order by Timestamp desc\n| take 50",
+          "layout": { "x": 0, "y": 8, "width": 12, "height": 4 }
+        }
+      ]
+    },
+    {
+      "id": "page-comms",
+      "name": "Communications",
+      "tiles": [
+        {
+          "id": "tile-comms-timeline",
+          "title": "Communications Timeline",
+          "kind": "timechart",
+          "dataSourceId": "aether-eventhouse",
+          "query": "Communications\n| summarize MsgCount = count() by bin(Timestamp, 1m), Channel\n| render timechart",
+          "layout": { "x": 0, "y": 0, "width": 12, "height": 4 }
+        },
+        {
+          "id": "tile-comms-network",
+          "title": "Communication Network",
+          "kind": "table",
+          "dataSourceId": "aether-eventhouse",
+          "query": "Communications\n| summarize MessageCount = count() by SenderName, ReceiverName\n| order by MessageCount desc",
+          "layout": { "x": 0, "y": 4, "width": 6, "height": 4 }
+        },
+        {
+          "id": "tile-comms-sentiment",
+          "title": "Message Sentiment",
+          "kind": "barchart",
+          "dataSourceId": "aether-eventhouse",
+          "query": "Communications\n| summarize Count = count() by Sentiment\n| render barchart",
+          "layout": { "x": 6, "y": 4, "width": 6, "height": 4 }
+        },
+        {
+          "id": "tile-comms-detail",
+          "title": "Recent Messages",
+          "kind": "table",
+          "dataSourceId": "aether-eventhouse",
+          "query": "Communications\n| project Timestamp, SenderName, ReceiverName, Channel, MessageSnippet, Sentiment\n| order by Timestamp desc\n| take 50",
+          "layout": { "x": 0, "y": 8, "width": 12, "height": 4 }
+        }
+      ]
+    },
+    {
+      "id": "page-audience-votes",
+      "name": "Audience Votes",
+      "tiles": [
+        {
+          "id": "tile-audience-votes-bar",
+          "title": "Audience Votes",
+          "kind": "barchart",
+          "dataSourceId": "aether-eventhouse",
+          "query": "Votes\n| summarize VoteCount = count() by Suspect\n| order by VoteCount desc\n| render barchart",
+          "layout": { "x": 0, "y": 0, "width": 8, "height": 4 }
+        },
+        {
+          "id": "tile-audience-confidence",
+          "title": "Average Confidence by Suspect",
+          "kind": "barchart",
+          "dataSourceId": "aether-eventhouse",
+          "query": "Votes\n| summarize AvgConfidence = avg(Confidence), VoteCount = count() by Suspect\n| order by VoteCount desc\n| render barchart",
+          "layout": { "x": 8, "y": 0, "width": 4, "height": 4 }
+        },
+        {
+          "id": "tile-audience-recent",
+          "title": "Recent Audience Guesses",
+          "kind": "table",
+          "dataSourceId": "aether-eventhouse",
+          "query": "Votes\n| project Timestamp, Suspect, Confidence, Motive\n| order by Timestamp desc\n| take 25",
+          "layout": { "x": 0, "y": 4, "width": 12, "height": 4 }
+        }
+      ]
+    }
+  ]
+}

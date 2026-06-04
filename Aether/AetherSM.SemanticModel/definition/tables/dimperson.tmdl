@@ -1,0 +1,129 @@
+table dimperson
+	lineageTag: 6a3b8c2d-4e5f-7a9b-1c2d-3e4f5a6b7c8d
+	sourceLineageTag: [dbo].[dimperson]
+
+	measure ImageColumn =
+			```
+			SELECTEDVALUE(dimperson[ImageURL])
+			```
+		lineageTag: 93e8366c-a245-492d-a8db-eede1d3889cc
+		dataCategory: ImageUrl
+
+		changedProperty = Name
+
+		changedProperty = DataCategory
+
+	measure SelectedBio =
+			```
+			SELECTEDVALUE(dimperson[ExtendedBio], "Select a person to view their bio.")
+			```
+		lineageTag: d7c9326f-e076-408a-8d0b-9e93ae1444af
+
+		changedProperty = Name
+
+	measure MaxBio = MAX(dimperson[ExtendedBio])
+		lineageTag: bad9bc5d-0dbf-4bab-892b-0b99900add2d
+
+		changedProperty = Name
+
+	measure SumPers = SUM(dimperson[PersonID])
+		formatString: 0
+		lineageTag: 799dc5c3-9952-4656-ade8-521d09397450
+
+		changedProperty = Name
+
+	column PersonID
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: 8297bbfd-6520-4267-a374-ea3c879e7b67
+		sourceLineageTag: PersonID
+		summarizeBy: none
+		sourceColumn: PersonID
+
+		annotation SummarizationSetBy = Automatic
+
+	column PersonName
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 31f178fc-f0ce-4aff-b78c-b90be1994749
+		sourceLineageTag: PersonName
+		summarizeBy: none
+		sourceColumn: PersonName
+		sortByColumn: PersonID
+
+		changedProperty = SortByColumn
+
+		annotation SummarizationSetBy = Automatic
+
+	column PersonRole
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 389254b0-682c-4435-8fc5-15c7619ccbeb
+		sourceLineageTag: PersonRole
+		summarizeBy: none
+		sourceColumn: PersonRole
+
+		annotation SummarizationSetBy = Automatic
+
+	column Motive
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: c84b5af5-bf5c-4010-8f61-338ba6d9040f
+		sourceLineageTag: Motive
+		summarizeBy: none
+		sourceColumn: Motive
+
+		annotation SummarizationSetBy = Automatic
+
+	column Secret
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: f3efc4dc-8f96-4a72-8e8e-539ba16c1aad
+		sourceLineageTag: Secret
+		summarizeBy: none
+		sourceColumn: Secret
+
+		annotation SummarizationSetBy = Automatic
+
+	column Bio
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: e3382c9e-581c-45e1-beea-2c1f4604133b
+		sourceLineageTag: Bio
+		summarizeBy: none
+		sourceColumn: Bio
+
+		annotation SummarizationSetBy = Automatic
+
+	column ImageURL
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 9187827c-422f-46b5-abc8-a3c791dbb282
+		sourceLineageTag: ImageURL
+		dataCategory: ImageUrl
+		summarizeBy: none
+		sourceColumn: ImageURL
+
+		changedProperty = DataCategory
+
+		annotation SummarizationSetBy = Automatic
+
+	column ExtendedBio
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 8ed30ebf-1807-4b47-b0a5-5b15894cd446
+		sourceLineageTag: ExtendedBio
+		summarizeBy: none
+		sourceColumn: ExtendedBio
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimperson = entity
+		mode: directLake
+		source
+			entityName: dimperson
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table

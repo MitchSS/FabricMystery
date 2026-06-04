@@ -1,0 +1,48 @@
+{
+  "shortcuts": [
+    {
+      "path": "Tables",
+      "name": "SecurityLogs",
+      "target": {
+        "oneLake": {
+          "workspaceId": "{{WORKSPACE_ID}}",
+          "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+          "path": "Tables/SecurityLogs"
+        }
+      }
+    },
+    {
+      "path": "Tables",
+      "name": "Communications",
+      "target": {
+        "oneLake": {
+          "workspaceId": "{{WORKSPACE_ID}}",
+          "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+          "path": "Tables/Communications"
+        }
+      }
+    },
+    {
+      "path": "Tables",
+      "name": "VictimCalendar",
+      "target": {
+        "oneLake": {
+          "workspaceId": "{{WORKSPACE_ID}}",
+          "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+          "path": "Tables/VictimCalendar"
+        }
+      }
+    },
+    {
+      "path": "Tables",
+      "name": "SupplierRecords",
+      "target": {
+        "oneLake": {
+          "workspaceId": "{{WORKSPACE_ID}}",
+          "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+          "path": "Tables/SupplierRecords"
+        }
+      }
+    }
+  ]
+}

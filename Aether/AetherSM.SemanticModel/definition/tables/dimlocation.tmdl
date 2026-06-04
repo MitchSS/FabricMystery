@@ -1,0 +1,54 @@
+table dimlocation
+	lineageTag: 7b2c4e8f-3a1d-4f5e-9c6b-8d7a2e1f0b34
+	sourceLineageTag: [dbo].[dimlocation]
+
+	column LocationID
+		dataType: int64
+		formatString: 0
+		sourceProviderType: int
+		lineageTag: e95b6764-8434-4807-9684-bc2af7d0e6e8
+		sourceLineageTag: LocationID
+		summarizeBy: none
+		sourceColumn: LocationID
+
+		annotation SummarizationSetBy = Automatic
+
+	column LocationName
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 235fa09b-86b9-4172-a00a-ccc61bf42d4a
+		sourceLineageTag: LocationName
+		summarizeBy: none
+		sourceColumn: LocationName
+
+		annotation SummarizationSetBy = Automatic
+
+	column Description
+		dataType: string
+		sourceProviderType: varchar(8000)
+		lineageTag: 12a1ddb8-37aa-438d-afc6-2febae9400b6
+		sourceLineageTag: Description
+		summarizeBy: none
+		sourceColumn: Description
+
+		annotation SummarizationSetBy = Automatic
+
+	column IsInitiallyLocked
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		sourceProviderType: bit
+		lineageTag: 568ab8de-958a-473e-986e-c0513eab7fd3
+		sourceLineageTag: IsInitiallyLocked
+		summarizeBy: none
+		sourceColumn: IsInitiallyLocked
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dimlocation = entity
+		mode: directLake
+		source
+			entityName: dimlocation
+			schemaName: dbo
+			expressionSource: DatabaseQuery
+
+	annotation PBI_ResultType = Table
