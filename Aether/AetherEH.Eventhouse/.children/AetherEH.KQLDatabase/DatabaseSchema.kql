@@ -8,47 +8,40 @@
 .create-merge table SecurityLogs (
     Timestamp: datetime,
     PersonID: int,
-    PersonName: string,
     LocationID: int,
-    LocationName: string,
-    AccessType: string,
-    Details: string,
-    IsSuspicious: bool
+    EventType: string
 )
 
 // --- Communications ---
 // Intercepted messages between persons of interest
 .create-merge table Communications (
     Timestamp: datetime,
-    SenderID: int,
-    SenderName: string,
-    ReceiverID: int,
-    ReceiverName: string,
-    Channel: string,
-    MessageSnippet: string,
-    Sentiment: string
+    CommsType: string,
+    Sender: string,
+    Recipient: string,
+    Subject: string,
+    Body: string,
+    Status: string
 )
 
 // --- VictimCalendar ---
 // Julian Croft's schedule in the 48 hours before his death
 .create-merge table VictimCalendar (
-    Timestamp: datetime,
-    EventTitle: string,
-    LocationID: int,
-    LocationName: string,
-    AttendeesCSV: string,
-    Notes: string
+    StartTime: datetime,
+    EndTime: datetime,
+    Subject: string,
+    Attendees: dynamic,
+    Status: string
 )
 
 // --- SupplierRecords ---
 // Deliveries and external access to the estate
 .create-merge table SupplierRecords (
-    Timestamp: datetime,
-    SupplierName: string,
-    ItemDelivered: string,
-    ReceivedByPersonID: int,
-    ReceivedByName: string,
-    LocationID: int,
+    OrderDate: datetime,
+    Supplier: string,
+    ItemCode: string,
+    ItemDescription: string,
+    Quantity: int,
     Notes: string
 )
 
