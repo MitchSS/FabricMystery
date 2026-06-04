@@ -86,3 +86,84 @@ The script does **not** support incremental updates — it expects a fresh works
 | Notebook job times out | Check capacity isn't throttled; default timeout is 10 minutes |
 | Shortcuts fail | Eventhouse must be fully provisioned (script waits 5s, but busy capacities may need longer) |
 | Vote Ingester gets 403 from Graph | The notebook identity needs `Forms.Read.All` consent in Entra ID |
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Data["Data Layer"]
+        EH[Eventhouse: AetherEH]
+        LH[Lakehouse: AetherLH]
+        EH -->|Delta Table Shortcuts| LH
+    end
+
+    subgraph Compute["Compute"]
+        POP[Populate Lakehouse]
+        SIM[Event Simulator]
+        REB[Rebind Semantic Model]
+        VOTE[Vote Ingester]
+    end
+
+    subgraph Analytics["Analytics"]
+        SM[Semantic Model: AetherSM\nDirect Lake]
+        KD[KQL Dashboard:\nLogs + Votes]
+    end
+
+    subgraph Experience["Player Experience"]
+        R1[Investigation Report]
+        R2[Logs Report]
+        DA[Data Agent: Aether AI]
+        APP[Org App:\nGhost in the Aether]
+    end
+
+    subgraph External["External"]
+        FORMS[Microsoft Forms\nQR Code]
+        AUDIENCE((Audience))
+    end
+
+    POP --> LH
+    SIM -->|Event Hub| EH
+    REB --> SM
+    VOTE -->|Graph API| FORMS
+    VOTE -->|Ingest| EH
+    AUDIENCE --> FORMS
+
+    LH --> SM
+    EH --> KD
+    EH --> DA
+    LH --> DA
+    SM --> R1
+    SM --> R2
+    R1 --> APP
+    R2 --> APP
+    DA --> APP
+    KD --> APP
+```
+
+## Deployment Dependencies
+
+```mermaid
+flowchart TD
+    A[1. Create Workspace] --> B[2. Eventhouse + KQL DB]
+    A --> C[3. Lakehouse]
+    B --> D[4. KQL Schema]
+    B --> E[5. Shortcuts]
+    C --> E
+    E --> F[6. Populate Lakehouse Notebook ▶]
+    F --> G[7. Semantic Model]
+    G --> H[8. Rebind Notebook ▶]
+    G --> I[9. Reports]
+    D --> J[10. KQL Dashboard]
+    B --> K[11. Data Agent]
+    C --> K
+    I --> L[12. Org App]
+    J --> L
+    K --> L
+    A --> M[13. Event Simulator Notebook]
+    A --> N[14. Vote Ingester Notebook]
+
+    style F stroke:#107C10,stroke-width:2px
+    style H stroke:#107C10,stroke-width:2px
+```
+
+> ▶ indicates notebooks that are executed during deployment. All other notebooks are deployed but run manually by the presenter.
