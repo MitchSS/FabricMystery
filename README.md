@@ -14,7 +14,7 @@
 
 ## Deployment
 
-The included `deploy.ps1` script creates all Fabric items in the correct dependency order using the Fabric REST API. No manual portal clicks required.
+The included `deploy.ps1` script creates the core Fabric items in the correct dependency order using the Fabric REST API. A small amount of post-deployment portal setup is still required for Open Mirroring.
 
 ### Quick Start
 
@@ -51,7 +51,7 @@ cd FabricMystery
 | 11 | Deploy Data Agent (`AetherDA`) |
 | 12 | Deploy Org App (`Aether App`) |
 | 13 | Deploy Event Simulator notebook |
-| 14 | Deploy Vote Ingester notebook |
+| 14 | Create Mirrored Database (Votes Mirror) |
 
 ### Post-Deployment Setup
 
@@ -59,12 +59,15 @@ Once the script completes:
 
 1. **Event Simulator** — Open the notebook in Fabric, set the `AETHER_EVENTHUB_CONNECTION_STRING` environment variable, then run it to start streaming events.
 
-2. **Vote Ingester** (optional) — Create a public Microsoft Form with:
-   - Question 1: "Who did it?" (choice: Evelyn Reed, Marcus Thorne, Anya Sharma, Dr. Alistair Finch)
-   - Question 2: "Confidence?" (rating 1–5)
-   - Question 3: "What was the motive?" (free text)
-   
-   Copy the Form ID into the notebook's `FORM_ID` parameter and run it when audience voting opens.
+2. **Audience Voting (Open Mirroring)** — Set up the live voting pipeline:
+   1. Create a public Microsoft Form with:
+      - Question 1: "Who did it?" (choice: Evelyn Reed, Marcus Thorne, Anya Sharma, Dr. Alistair Finch)
+      - Question 2: "Confidence?" (rating 1–5)
+      - Question 3: "What was the motive?" (free text)
+   2. In Forms settings, enable "Sync responses to Excel" (saves to OneDrive)
+   3. In the Fabric portal, open "Votes Mirror" → configure the landing zone to read from the OneDrive Excel file
+   4. Create a shortcut in the AetherEH KQL Database pointing to the mirrored `Votes` table
+   5. Submit a test response and verify it appears in the KQL Dashboard's "Audience Votes" page
 
 3. **Open the App** — Navigate to the workspace in the Fabric portal and launch "Aether App" for the player experience.
 
@@ -85,7 +88,7 @@ The script does **not** support incremental updates — it expects a fresh works
 | Workspace creation fails | Ensure you have capacity admin rights and the `-CapacityId` is correct |
 | Notebook job times out | Check capacity isn't throttled; default timeout is 10 minutes |
 | Shortcuts fail | Eventhouse must be fully provisioned (script waits 5s, but busy capacities may need longer) |
-| Vote Ingester gets 403 from Graph | The notebook identity needs `Forms.Read.All` consent in Entra ID |
+| Audience Votes page is empty | Verify Forms is syncing to Excel, "Votes Mirror" is configured, and the Eventhouse shortcut points to the mirrored `Votes` table |
 
 ## Architecture
 
@@ -94,6 +97,7 @@ flowchart LR
     subgraph Data["Data Layer"]
         EH[Eventhouse: AetherEH]
         LH[Lakehouse: AetherLH]
+        MIRROR[Mirrored DB:\nVotes Mirror]
         EH -->|Delta Table Shortcuts| LH
     end
 
@@ -101,7 +105,6 @@ flowchart LR
         POP[Populate Lakehouse]
         SIM[Event Simulator]
         REB[Rebind Semantic Model]
-        VOTE[Vote Ingester]
     end
 
     subgraph Analytics["Analytics"]
@@ -124,9 +127,9 @@ flowchart LR
     POP --> LH
     SIM -->|Event Hub| EH
     REB --> SM
-    VOTE -->|Graph API| FORMS
-    VOTE -->|Ingest| EH
     AUDIENCE --> FORMS
+    FORMS -->|Excel sync| MIRROR
+    MIRROR -->|Shortcut| EH
 
     LH --> SM
     EH --> KD
@@ -160,7 +163,7 @@ flowchart TD
     J --> L
     K --> L
     A --> M[13. Event Simulator Notebook]
-    A --> N[14. Vote Ingester Notebook]
+    A --> N[14. Mirrored Database]
 
     style F stroke:#107C10,stroke-width:2px
     style H stroke:#107C10,stroke-width:2px

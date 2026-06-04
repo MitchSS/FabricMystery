@@ -8,7 +8,7 @@
 
 ### Approach: Local Files → Publish via Fabric REST API (`az rest`)
 
-All artifacts are authored locally as files in the git repo, then deployed to a Fabric workspace using the Fabric Items REST API. Each item is created with its **definition envelope** (base64-encoded content parts).
+Most artifacts are authored locally as files in the git repo, then deployed to a Fabric workspace using the Fabric Items REST API. Items with local definitions are created with a **definition envelope** (base64-encoded content parts), while the mirrored database is created directly and configured in the Fabric portal afterward.
 
 ### Deployable Item Matrix
 
@@ -23,6 +23,7 @@ All artifacts are authored locally as files in the git repo, then deployed to a 
 | Report | `PBIR` | `definition.pbir`, `report.json` |
 | Data Agent | `dataAgent` | Config files (stage_config, datasources, fewshots) |
 | Org App | `orgApp` | `definition.json` |
+| Mirrored Database | n/a | Created from item metadata only; source configured in portal |
 
 ### Deployment API Pattern
 
@@ -64,6 +65,7 @@ flowchart TD
     J --> L
     K --> L
     A --> M[13. Deploy Event Simulator Notebook]
+    A --> N[14. Create Mirrored Database]
 ```
 
 Key constraints:
@@ -72,6 +74,7 @@ Key constraints:
 - Reports depend on semantic model
 - Org App depends on reports + Data Agent existing (needs their logical IDs)
 - Rebind notebook must run after semantic model + lakehouse are both created
+- Audience voting uses Open Mirroring, so the mirrored database source and Eventhouse shortcut are configured manually after deployment
 
 ### Files Needing Dynamic ID Injection at Deploy Time
 
@@ -139,6 +142,8 @@ FabricMystery/
     └── RealTimeDashboard.json
 ```
 
+> `Votes Mirror` is created directly by `deploy.ps1`; there is no local artifact folder because the Open Mirroring source is configured in the Fabric portal.
+
 ---
 
 ## 1. Narrative Design
@@ -193,6 +198,7 @@ flowchart LR
     subgraph Data Layer
         LH[Lakehouse: AetherLH]
         EH[Eventhouse: AetherEH]
+        MIRROR[Mirrored DB: Votes Mirror]
     end
 
     subgraph Compute
@@ -203,7 +209,11 @@ flowchart LR
 
     subgraph Analytics
         SM[Direct Lake Semantic Model: AetherSM]
-        KD[KQL Dashboard: Logs]
+        KD[KQL Dashboard: Logs + Votes]
+    end
+
+    subgraph External
+        FORMS[Microsoft Forms]
     end
 
     subgraph Player Experience
@@ -215,6 +225,8 @@ flowchart LR
 
     POP --> LH
     SIM -->|Event Hub| EH
+    FORMS -->|Excel sync| MIRROR
+    MIRROR -->|Shortcut| EH
     EH -->|Delta Table Shortcuts| LH
     LH --> SM
     EH --> KD
@@ -231,11 +243,13 @@ flowchart LR
 ### Data Flow
 1. **Populate Lakehouse** notebook inserts static dimension data (persons, locations, evidence) into the Lakehouse.
 2. **Event Simulator** notebook publishes real-time events (SecurityLogs, Communications) to an Event Hub endpoint → ingested by Eventhouse.
-3. **Delta Table Shortcuts** bridge 4 Eventhouse tables (SecurityLogs, Communications, VictimCalendar, SupplierRecords) into the Lakehouse as tables.
-4. **Direct Lake Semantic Model** exposes all 7 tables for reporting.
-5. **Reports** let players explore the data visually.
-6. **Data Agent** lets players ask natural-language questions of the data.
-7. **Org App** wraps everything into a single player-facing portal.
+3. **Audience voting** uses Microsoft Forms → OneDrive Excel sync → Open Mirroring into `Votes Mirror`.
+4. **Shortcut configuration** exposes the mirrored `Votes` table to the `AetherEH` KQL database so the dashboard can keep querying `Votes`.
+5. **Delta Table Shortcuts** bridge 4 Eventhouse tables (SecurityLogs, Communications, VictimCalendar, SupplierRecords) into the Lakehouse as tables.
+6. **Direct Lake Semantic Model** exposes all 7 tables for reporting.
+7. **Reports** let players explore the data visually.
+8. **Data Agent** lets players ask natural-language questions of the data.
+9. **Org App** wraps everything into a single player-facing portal.
 
 ---
 
@@ -332,6 +346,14 @@ flowchart LR
   1. **Overview** — "Welcome to Ghost in the Aether: A Murder Mystery where you are the detective"
   2. **Investigation** — Links to Investigation Report and Logs Report
   3. **Chat with Aether AI** — External link to Data Agent
+
+### Step 13: Configure Audience Voting via Open Mirroring
+- Create a public Microsoft Form for suspect, confidence, and motive input
+- Enable Forms → Excel sync so responses land in OneDrive
+- Create the `Votes Mirror` mirrored database during deployment
+- In the Fabric portal, configure the mirrored database landing zone to the Excel file
+- Create a shortcut from the mirrored `Votes` table into the `AetherEH` KQL database
+- Verify the Audience Votes page updates after a test submission
 
 ---
 

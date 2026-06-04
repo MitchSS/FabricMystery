@@ -362,19 +362,18 @@ $simNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Event Simulator" -Type "N
 
 Write-Host "  NOTE: Event Simulator is NOT auto-run. Start it manually when ready for the demo."
 
-# --- Step 14: Deploy Vote Ingester Notebook ---
-Write-Host "[14/14] Deploying Vote Ingester Notebook"
+# --- Step 14: Create Mirrored Database for audience votes ---
+Write-Host "[14/14] Creating Mirrored Database for audience votes"
 
-$votePath = Join-Path $ScriptRoot "Aether\Vote Ingester.Notebook\notebook.ipynb"
-$voteContent = Get-Content $votePath -Raw
-$voteContent = Replace-Placeholders -Content $voteContent -Tokens $tokens
-$voteContent = $voteContent -replace '"id": ""', "`"id`": `"$LH_ID`""
-
-$voteNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Vote Ingester" -Type "Notebook" -Format "ipynb" -Parts @(
-    @{ path = "notebook.ipynb"; payload = (Get-Base64String $voteContent); payloadType = "InlineBase64" }
-)
-
-Write-Host "  NOTE: Vote Ingester is NOT auto-run. Set the MS Forms form ID, then start it manually when voting opens."
+$mirrorBody = @{
+    displayName = "Votes Mirror"
+    type        = "MirroredDatabase"
+}
+$mirrorResult = Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WS_ID/items" -Body $mirrorBody
+$MIRROR_ID = $mirrorResult.id
+Write-Host "  Created: Votes Mirror (MirroredDatabase) -> $MIRROR_ID"
+Write-Host "  NOTE: In the Fabric portal, configure 'Votes Mirror' to point at the OneDrive Excel file synced from Microsoft Forms."
+Write-Host "  NOTE: After mirroring is configured, create a shortcut in the AetherEH KQL Database so the dashboard's Votes queries resolve to the mirrored table."
 
 # ============================================================
 # Summary
@@ -397,13 +396,13 @@ Write-Host "  Data Agent:       $DA_ID"
 Write-Host "  KQL Dashboard:    $($dashResult.id)"
 Write-Host "  Org App:          $($orgAppResult.id)"
 Write-Host "  Event Simulator:  $($simNb.id)"
-Write-Host "  Vote Ingester:    $($voteNb.id)"
+Write-Host "  Votes Mirror:     $MIRROR_ID"
 Write-Host ""
 Write-Host "Portal: https://app.fabric.microsoft.com/groups/$WS_ID"
 Write-Host ""
 Write-Host "Next Steps:"
 Write-Host "  1. Set AETHER_EVENTHUB_CONNECTION_STRING in the Event Simulator notebook"
 Write-Host "  2. Run Event Simulator to begin the live demo"
-Write-Host "  3. Create the public MS Form and copy its Form ID into Vote Ingester"
-Write-Host "  4. Run Vote Ingester when audience voting opens"
-Write-Host "  5. Open the Aether App and Logs dashboard to start investigating!"
+Write-Host "  3. Create a public MS Form, enable 'sync responses to Excel' in OneDrive"
+Write-Host "  4. In the Fabric portal, open 'Votes Mirror' and configure the landing zone to point at the Excel file"
+Write-Host "  5. Submit a test response and verify it appears in the mirrored database"
