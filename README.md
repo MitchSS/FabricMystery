@@ -46,7 +46,7 @@ cd FabricMystery
 | 6 | Deploy & run Populate Lakehouse notebook (dimension data) |
 | 7 | Deploy Semantic Model (`AetherSM` — Direct Lake) |
 | 8 | Deploy & run Rebind Semantic Model notebook |
-| 9 | Deploy Reports *(skipped — PBIR definitions not yet authored)* |
+| 9 | Deploy Reports (`Aether Investigation`, `Logs`) — rebound to the deployed Semantic Model |
 | 10 | Deploy KQL Dashboard (Security Logs, Communications, Audience Votes) |
 | 11 | Deploy Data Agent (`AetherDA`) |
 | 12 | Deploy Org App (`Aether App`) |

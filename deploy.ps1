@@ -131,6 +131,49 @@ function Deploy-Item {
     return $result
 }
 
+function Deploy-Report {
+    param(
+        [string]$WorkspaceId,
+        [string]$ReportFolder,
+        [string]$DisplayName,
+        [string]$SemanticModelId
+    )
+
+    # Collect every file under the report folder. The local ".platform" file is a
+    # git-integration artifact and is not part of a REST definition payload.
+    $parts = @()
+    $files = Get-ChildItem -Path $ReportFolder -Recurse -File | Where-Object { $_.Name -ne ".platform" }
+
+    foreach ($file in $files) {
+        $relPath = $file.FullName.Substring($ReportFolder.Length).TrimStart("\", "/") -replace "\\", "/"
+
+        if ($relPath -eq "definition.pbir") {
+            # Locally the report binds to the model by relative path (byPath), which the
+            # service cannot resolve. Rebind to the freshly deployed model via a live
+            # connection (byConnection) keyed on the semantic model's item ID.
+            $pbir = Get-Content $file.FullName -Raw | ConvertFrom-Json
+            $pbir.datasetReference = @{
+                byConnection = @{
+                    connectionString          = $null
+                    pbiServiceModelId         = $null
+                    pbiModelVirtualServerName = "sobe_wowvirtualserver"
+                    pbiModelDatabaseName      = $SemanticModelId
+                    name                      = "EntityDataSource"
+                    connectionType            = "pbiServiceXmlaStyleLive"
+                }
+            }
+            $payload = Get-Base64String ($pbir | ConvertTo-Json -Depth 20)
+        }
+        else {
+            $payload = Get-Base64File $file.FullName
+        }
+
+        $parts += @{ path = $relPath; payload = $payload; payloadType = "InlineBase64" }
+    }
+
+    return Deploy-Item -WorkspaceId $WorkspaceId -DisplayName $DisplayName -Type "Report" -Format "PBIR" -Parts $parts
+}
+
 # ============================================================
 # Main Deployment Flow
 # ============================================================
@@ -289,9 +332,22 @@ $jobResult = Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WS_ID/
 $jobId = $jobResult.id
 Wait-ForJob -WorkspaceId $WS_ID -ItemId $rebindNb.id -JobInstanceId $jobId
 
-# --- Step 9: Deploy Reports (placeholder - requires PBIR files) ---
-Write-Host "[9/14] Reports — skipped (PBIR definitions not yet authored)"
-$REPORT_LOGICAL_ID = "report-placeholder"
+# --- Step 9: Deploy Reports ---
+Write-Host "[9/14] Deploying Reports"
+
+$invReportResult = Deploy-Report -WorkspaceId $WS_ID `
+    -ReportFolder (Join-Path $ScriptRoot "Aether Investigation.Report") `
+    -DisplayName "Aether Investigation" -SemanticModelId $SM_ID
+$INV_REPORT_ID = $invReportResult.id
+
+$logsReportResult = Deploy-Report -WorkspaceId $WS_ID `
+    -ReportFolder (Join-Path $ScriptRoot "Logs.Report") `
+    -DisplayName "Logs" -SemanticModelId $SM_ID
+$LOGS_REPORT_ID = $logsReportResult.id
+
+# The Org App links to the Investigation report by the ID assigned by the service
+# at creation time (it does not exist until the item is deployed above).
+$REPORT_LOGICAL_ID = $INV_REPORT_ID
 
 # --- Step 10: Deploy KQL Dashboard ---
 Write-Host "[10/14] Deploying KQL Dashboard"
@@ -333,7 +389,8 @@ foreach ($f in $daFiles) {
 
 $daResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherDA" -Type "DataAgent" -Format "dataAgent" -Parts $daParts
 $DA_ID = $daResult.id
-$AGENT_LOGICAL_ID = "aether-data-agent"
+# The Org App links to the agent by its service-assigned ID (retrieved post-deploy).
+$AGENT_LOGICAL_ID = $DA_ID
 
 # --- Step 12: Deploy Org App ---
 Write-Host "[12/14] Deploying Org App"
@@ -392,6 +449,8 @@ Write-Host "  Eventhouse:       $EH_ID"
 Write-Host "  KQL Database:     $KQL_DB_ID"
 Write-Host "  Lakehouse:        $LH_ID"
 Write-Host "  Semantic Model:   $SM_ID"
+Write-Host "  Investigation:    $INV_REPORT_ID"
+Write-Host "  Logs Report:      $LOGS_REPORT_ID"
 Write-Host "  Data Agent:       $DA_ID"
 Write-Host "  KQL Dashboard:    $($dashResult.id)"
 Write-Host "  Org App:          $($orgAppResult.id)"
