@@ -35,25 +35,12 @@
           "elementType": "item",
           "elementId": "dba15717-a16d-443e-a089-0f1b1a9e59e3",
           "itemType": "Report",
-          "itemLogicalId": "{{REPORT_LOGICAL_ID}}",
+          "itemId": "{{REPORT_LOGICAL_ID}}",
+          "folderObjectId": "{{WORKSPACE_ID}}",
           "displayName": "Aether Investigation"
         }
       ],
       "displayName": "Investigation"
-    },
-    {
-      "elementType": "section",
-      "elementId": "3ca78a8d-de87-4bb6-8161-3f3eac331cd5",
-      "elements": [
-        {
-          "elementType": "item",
-          "elementId": "5fa4c472-6cb4-4f11-b147-3c9593c1af51",
-          "itemType": "DataAgent",
-          "itemLogicalId": "{{AGENT_LOGICAL_ID}}",
-          "displayName": "Aether AI"
-        }
-      ],
-      "displayName": "Chat with Aether AI"
     }
   ]
 }

@@ -37,20 +37,41 @@ function Invoke-FabricApi {
     param(
         [string]$Method,
         [string]$Url,
-        [object]$Body = $null
+        [object]$Body = $null,
+        [string]$Resource = $FabricResource
     )
 
-    $args = @("rest", "--method", $Method, "--resource", $FabricResource, "--url", $Url)
+    $args = @("rest", "--method", $Method, "--resource", $Resource, "--url", $Url)
+    $bodyFile = $null
 
     if ($Body) {
         $json = $Body | ConvertTo-Json -Depth 20 -Compress
-        $args += @("--body", $json)
+        # Pass the JSON via a temp file (--body "@file"). Passing raw JSON inline to
+        # az on Windows/PowerShell strips the inner double quotes, corrupting the body.
+        $bodyFile = New-TemporaryFile
+        [System.IO.File]::WriteAllText($bodyFile.FullName, $json, [System.Text.UTF8Encoding]::new($false))
+        $args += @("--body", "@$($bodyFile.FullName)")
         $args += @("--headers", "Content-Type=application/json")
     }
 
-    $result = az @args 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        throw "API call failed: $Method $Url`n$result"
+    try {
+        $maxAttempts = 5
+        for ($attempt = 1; ; $attempt++) {
+            $result = az @args 2>&1
+            if ($LASTEXITCODE -eq 0) { break }
+
+            # Retry transient network/proxy/service failures; fail fast on real API errors.
+            $errText = "$result"
+            $transient = $errText -match 'SSLError|Max retries|Connection (reset|aborted)|timed out|TooManyRequests|ServiceUnavailable|Gateway|InternalServiceError|[Ii]nternal service error|Request aborted|\b(429|500|502|503|504)\b|temporarily'
+            if ($attempt -ge $maxAttempts -or -not $transient) {
+                throw "API call failed: $Method $Url`n$result"
+            }
+            Write-Host "  Transient error (attempt $attempt); retrying in $([Math]::Min(30, 5 * $attempt))s..."
+            Start-Sleep -Seconds ([Math]::Min(30, 5 * $attempt))
+        }
+    }
+    finally {
+        if ($bodyFile) { Remove-Item $bodyFile.FullName -Force -ErrorAction SilentlyContinue }
     }
 
     if ($result) {
@@ -69,6 +90,37 @@ function Get-Base64String {
     param([string]$Content)
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($Content)
     return [Convert]::ToBase64String($bytes)
+}
+
+function Set-NotebookLakehouse {
+    param(
+        [string]$NotebookPath,
+        [string]$LakehouseId,
+        [string]$LakehouseName,
+        [string]$WorkspaceId
+    )
+
+    # Fabric notebooks resolve %%sql / saveAsTable against a "default lakehouse" declared
+    # in notebook metadata (metadata.dependencies.lakehouse). Without it the Spark
+    # statements have no catalog to write to and the run fails.
+    $nb = Get-Content $NotebookPath -Raw | ConvertFrom-Json
+
+    $lakehouse = [pscustomobject]@{
+        default_lakehouse              = $LakehouseId
+        default_lakehouse_name         = $LakehouseName
+        default_lakehouse_workspace_id = $WorkspaceId
+        known_lakehouses               = @([pscustomobject]@{ id = $LakehouseId })
+    }
+    $deps = [pscustomobject]@{ lakehouse = $lakehouse }
+
+    if ($nb.metadata.PSObject.Properties.Name -contains 'dependencies') {
+        $nb.metadata.dependencies = $deps
+    }
+    else {
+        $nb.metadata | Add-Member -NotePropertyName dependencies -NotePropertyValue $deps
+    }
+
+    return ($nb | ConvertTo-Json -Depth 40)
 }
 
 function Replace-Placeholders {
@@ -108,6 +160,47 @@ function Wait-ForJob {
     throw "Job $JobInstanceId timed out after $TimeoutSeconds seconds"
 }
 
+function Wait-ForItemByName {
+    param(
+        [string]$WorkspaceId,
+        [string]$DisplayName,
+        [string]$Type,
+        [int]$TimeoutSeconds = 300
+    )
+
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        $items = Invoke-FabricApi -Method "GET" -Url "$FabricApi/workspaces/$WorkspaceId/items?type=$Type"
+        $match = $items.value | Where-Object { $_.displayName -eq $DisplayName } | Select-Object -First 1
+        if ($match) { return $match }
+        Start-Sleep -Seconds 5
+    }
+    throw "Item '$DisplayName' ($Type) did not appear within $TimeoutSeconds seconds"
+}
+
+function Start-ItemJob {
+    param(
+        [string]$WorkspaceId,
+        [string]$ItemId,
+        [string]$JobType,
+        [int]$TimeoutSeconds = 90
+    )
+
+    $before = (Get-Date).ToUniversalTime()
+    Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WorkspaceId/items/$ItemId/jobs/instances?jobType=$JobType" -Body @{} | Out-Null
+
+    # The run job returns 202 with only a Location header (no body), so the instance id
+    # isn't available inline. Poll the instances list for the newly-created run.
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        $insts = Invoke-FabricApi -Method "GET" -Url "$FabricApi/workspaces/$WorkspaceId/items/$ItemId/jobs/instances"
+        $latest = $insts.value | Sort-Object { [datetime]$_.startTimeUtc } -Descending | Select-Object -First 1
+        if ($latest) { return $latest.id }
+        Start-Sleep -Seconds 3
+    }
+    throw "No job instance appeared for item $ItemId"
+}
+
 function Deploy-Item {
     param(
         [string]$WorkspaceId,
@@ -120,13 +213,24 @@ function Deploy-Item {
     $body = @{
         displayName = $DisplayName
         type        = $Type
-        definition  = @{
-            format = $Format
-            parts  = $Parts
-        }
+    }
+
+    # Some item types (e.g. Eventhouse, Lakehouse) are created without a definition
+    # envelope; the service provisions their child items automatically. Others (e.g.
+    # KQLDashboard) take a definition with parts but no format field.
+    if ($Parts) {
+        $body.definition = @{ parts = $Parts }
+        if ($Format) { $body.definition.format = $Format }
     }
 
     $result = Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WorkspaceId/items" -Body $body
+
+    # Definition-based creates run as a long-running operation and return 202 with no
+    # body, so no id is available inline. Resolve the item by name once provisioned.
+    if (-not $result -or -not $result.id) {
+        $result = Wait-ForItemByName -WorkspaceId $WorkspaceId -DisplayName $DisplayName -Type $Type
+    }
+
     Write-Host "  Created: $DisplayName ($Type) -> $($result.id)"
     return $result
 }
@@ -136,7 +240,9 @@ function Deploy-Report {
         [string]$WorkspaceId,
         [string]$ReportFolder,
         [string]$DisplayName,
-        [string]$SemanticModelId
+        [string]$SemanticModelId,
+        [string]$SemanticModelName,
+        [string]$WorkspaceName
     )
 
     # Collect every file under the report folder. The local ".platform" file is a
@@ -150,16 +256,14 @@ function Deploy-Report {
         if ($relPath -eq "definition.pbir") {
             # Locally the report binds to the model by relative path (byPath), which the
             # service cannot resolve. Rebind to the freshly deployed model via a live
-            # connection (byConnection) keyed on the semantic model's item ID.
+            # connection. The PBIR 2.0.0 schema's byConnection accepts only a
+            # connectionString; the service requires the semantic model GUID embedded
+            # as the semanticModelId parameter.
+            $connStr = "Data Source=powerbi://api.powerbi.com/v1.0/myorg/$WorkspaceName;Initial Catalog=$SemanticModelName;semanticModelId=$SemanticModelId"
             $pbir = Get-Content $file.FullName -Raw | ConvertFrom-Json
             $pbir.datasetReference = @{
                 byConnection = @{
-                    connectionString          = $null
-                    pbiServiceModelId         = $null
-                    pbiModelVirtualServerName = "sobe_wowvirtualserver"
-                    pbiModelDatabaseName      = $SemanticModelId
-                    name                      = "EntityDataSource"
-                    connectionType            = "pbiServiceXmlaStyleLive"
+                    connectionString = $connStr
                 }
             }
             $payload = Get-Base64String ($pbir | ConvertTo-Json -Depth 20)
@@ -203,9 +307,7 @@ if ($workspace) {
 # --- Step 2: Create Eventhouse ---
 Write-Host "[2/14] Creating Eventhouse + KQL Database"
 
-$ehResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherEH" -Type "Eventhouse" -Format "eventhouse" -Parts @(
-    @{ path = "EventhouseProperties.json"; payload = (Get-Base64String '{}'); payloadType = "InlineBase64" }
-)
+$ehResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherEH" -Type "Eventhouse"
 $EH_ID = $ehResult.id
 
 # Get the child KQL Database
@@ -223,9 +325,7 @@ Write-Host "  Cluster URI: $CLUSTER_URI"
 # --- Step 3: Create Lakehouse ---
 Write-Host "[3/14] Creating Lakehouse"
 
-$lhResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherLH" -Type "Lakehouse" -Format "lakehouse" -Parts @(
-    @{ path = "lakehouse.metadata.json"; payload = (Get-Base64String '{"properties":{}}'); payloadType = "InlineBase64" }
-)
+$lhResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherLH" -Type "Lakehouse"
 $LH_ID = $lhResult.id
 Write-Host "  Lakehouse ID: $LH_ID"
 
@@ -239,8 +339,18 @@ $schemaContent = Get-Content $schemaPath -Raw
 $commands = $schemaContent -split '(?=\.create-merge)' | Where-Object { $_.Trim() -ne "" -and $_ -match '\.create-merge' }
 foreach ($cmd in $commands) {
     $cmdBody = @{ csl = $cmd.Trim(); db = "AetherEH" }
-    Invoke-FabricApi -Method "POST" -Url "$CLUSTER_URI/v1/rest/mgmt" -Body $cmdBody
+    Invoke-FabricApi -Method "POST" -Url "$CLUSTER_URI/v1/rest/mgmt" -Body $cmdBody -Resource $CLUSTER_URI
     Write-Host "  Executed: $($cmd.Substring(0, [Math]::Min(60, $cmd.Length)))..."
+}
+
+# Enable OneLake availability on the tables that are exposed to the Lakehouse via
+# shortcuts. Without this policy, the KQL table has no OneLake (Tables/<name>) path
+# for a shortcut to target.
+$availTables = @("SecurityLogs", "Communications", "VictimCalendar", "SupplierRecords")
+foreach ($t in $availTables) {
+    $csl = ".alter-merge table $t policy mirroring dataformat=parquet with (IsEnabled=true, TargetLatencyInMinutes=5)"
+    Invoke-FabricApi -Method "POST" -Url "$CLUSTER_URI/v1/rest/mgmt" -Body @{ csl = $csl; db = "AetherEH" } -Resource $CLUSTER_URI
+    Write-Host "  OneLake availability enabled: $t"
 }
 
 # --- Step 5: Create Shortcuts ---
@@ -260,35 +370,71 @@ $shortcutsContent = Get-Content $shortcutsPath -Raw
 $shortcutsContent = Replace-Placeholders -Content $shortcutsContent -Tokens $tokens
 $shortcuts = $shortcutsContent | ConvertFrom-Json
 
+# OneLake availability materializes the table paths asynchronously; give it time
+# before creating shortcuts, and retry transient "path not found" style failures.
+Write-Host "  Waiting for OneLake table paths to materialize..."
+Start-Sleep -Seconds 30
+
 foreach ($sc in $shortcuts.shortcuts) {
     $scBody = @{
         path   = $sc.path
         name   = $sc.name
         target = $sc.target
     }
-    Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WS_ID/items/$LH_ID/shortcuts" -Body $scBody
-    Write-Host "  Shortcut: $($sc.name)"
+
+    $attempt = 0
+    while ($true) {
+        try {
+            Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WS_ID/items/$LH_ID/shortcuts" -Body $scBody
+            Write-Host "  Shortcut: $($sc.name)"
+            break
+        }
+        catch {
+            $attempt++
+            if ($attempt -ge 6) { throw }
+            Write-Host "  Shortcut $($sc.name) not ready (attempt $attempt); retrying in 20s..."
+            Start-Sleep -Seconds 20
+        }
+    }
 }
 
 # --- Step 6: Deploy + Run Populate Notebook ---
 Write-Host "[6/14] Deploying Populate Lakehouse Notebook"
 
 $popNbPath = Join-Path $ScriptRoot "Aether\Populate Lakehouse.Notebook\notebook.ipynb"
-$popNbContent = Get-Content $popNbPath -Raw
-# Inject lakehouse ID into notebook metadata
-$popNbContent = $popNbContent -replace '"id": ""', "`"id`": `"$LH_ID`""
+# Attach AetherLH as the notebook's default lakehouse so %%sql / saveAsTable resolve.
+$popNbContent = Set-NotebookLakehouse -NotebookPath $popNbPath -LakehouseId $LH_ID -LakehouseName "AetherLH" -WorkspaceId $WS_ID
 
 $popNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Populate Lakehouse" -Type "Notebook" -Format "ipynb" -Parts @(
     @{ path = "notebook.ipynb"; payload = (Get-Base64String $popNbContent); payloadType = "InlineBase64" }
 )
 
 Write-Host "  Running Populate Lakehouse notebook..."
-$jobResult = Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WS_ID/items/$($popNb.id)/jobs/instances?jobType=RunNotebook" -Body @{}
-$jobId = $jobResult.id
+$jobId = Start-ItemJob -WorkspaceId $WS_ID -ItemId $popNb.id -JobType "RunNotebook"
 Wait-ForJob -WorkspaceId $WS_ID -ItemId $popNb.id -JobInstanceId $jobId
 
 # --- Step 7: Deploy Semantic Model ---
 Write-Host "[7/14] Deploying Semantic Model"
+
+# Resolve the Lakehouse SQL analytics endpoint and inject it into the Direct Lake
+# model connection so it binds to this workspace's lakehouse at deploy time.
+Write-Host "  Resolving Lakehouse SQL endpoint..."
+$sqlServer = $null; $sqlDbId = $null
+$deadline = (Get-Date).AddSeconds(300)
+while ((Get-Date) -lt $deadline) {
+    $lh = Invoke-FabricApi -Method "GET" -Url "$FabricApi/workspaces/$WS_ID/lakehouses/$LH_ID"
+    $sqlProps = $lh.properties.sqlEndpointProperties
+    if ($sqlProps -and $sqlProps.provisioningStatus -eq "Success" -and $sqlProps.connectionString) {
+        $sqlServer = $sqlProps.connectionString
+        $sqlDbId = $sqlProps.id
+        break
+    }
+    Start-Sleep -Seconds 10
+}
+if (-not $sqlServer) { throw "Lakehouse SQL endpoint did not provision in time" }
+Write-Host "  SQL endpoint: $sqlServer (db $sqlDbId)"
+$tokens["LAKEHOUSE_SQL_ENDPOINT"] = $sqlServer
+$tokens["LAKEHOUSE_SQL_DB_ID"] = $sqlDbId
 
 $smDir = Join-Path $ScriptRoot "Aether\AetherSM.SemanticModel\definition"
 $smParts = @()
@@ -327,22 +473,31 @@ $rebindNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Rebind Semantic Model"
     @{ path = "notebook.ipynb"; payload = (Get-Base64String $rebindContent); payloadType = "InlineBase64" }
 )
 
+# The model connection is already injected at deploy time (step 7), so this rebind
+# is a redundant safety net; don't let a transient sempy/pip failure abort the deploy.
 Write-Host "  Running Rebind notebook..."
-$jobResult = Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WS_ID/items/$($rebindNb.id)/jobs/instances?jobType=RunNotebook" -Body @{}
-$jobId = $jobResult.id
-Wait-ForJob -WorkspaceId $WS_ID -ItemId $rebindNb.id -JobInstanceId $jobId
+try {
+    $jobId = Start-ItemJob -WorkspaceId $WS_ID -ItemId $rebindNb.id -JobType "RunNotebook"
+    Wait-ForJob -WorkspaceId $WS_ID -ItemId $rebindNb.id -JobInstanceId $jobId
+}
+catch {
+    Write-Host "  WARNING: Rebind notebook run failed ($_). The model connection was already"
+    Write-Host "           set at deploy time, so continuing. Re-run the notebook manually if needed."
+}
 
 # --- Step 9: Deploy Reports ---
 Write-Host "[9/14] Deploying Reports"
 
 $invReportResult = Deploy-Report -WorkspaceId $WS_ID `
     -ReportFolder (Join-Path $ScriptRoot "Aether Investigation.Report") `
-    -DisplayName "Aether Investigation" -SemanticModelId $SM_ID
+    -DisplayName "Aether Investigation" -SemanticModelId $SM_ID `
+    -SemanticModelName "AetherSM" -WorkspaceName $WorkspaceName
 $INV_REPORT_ID = $invReportResult.id
 
 $logsReportResult = Deploy-Report -WorkspaceId $WS_ID `
     -ReportFolder (Join-Path $ScriptRoot "Logs.Report") `
-    -DisplayName "Logs" -SemanticModelId $SM_ID
+    -DisplayName "Logs" -SemanticModelId $SM_ID `
+    -SemanticModelName "AetherSM" -WorkspaceName $WorkspaceName
 $LOGS_REPORT_ID = $logsReportResult.id
 
 # The Org App links to the Investigation report by the ID assigned by the service
@@ -356,7 +511,7 @@ $dashPath = Join-Path $ScriptRoot "Aether\Logs.KQLDashboard\RealTimeDashboard.js
 $dashContent = Get-Content $dashPath -Raw
 $dashContent = Replace-Placeholders -Content $dashContent -Tokens $tokens
 
-$dashResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Logs" -Type "KQLDashboard" -Format "kqlDashboard" -Parts @(
+$dashResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Logs" -Type "KQLDashboard" -Parts @(
     @{ path = "RealTimeDashboard.json"; payload = (Get-Base64String $dashContent); payloadType = "InlineBase64" }
 )
 
@@ -387,22 +542,23 @@ foreach ($f in $daFiles) {
     $daParts += @{ path = "Files/Config/$f"; payload = (Get-Base64String $content); payloadType = "InlineBase64" }
 }
 
-$daResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherDA" -Type "DataAgent" -Format "dataAgent" -Parts $daParts
+$daResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherDA" -Type "DataAgent" -Parts $daParts
 $DA_ID = $daResult.id
-# The Org App links to the agent by its service-assigned ID (retrieved post-deploy).
-$AGENT_LOGICAL_ID = $DA_ID
 
 # --- Step 12: Deploy Org App ---
 Write-Host "[12/14] Deploying Org App"
 
+# Item elements bind by itemId + folderObjectId (the workspace id is the root folder).
+# NOTE: Org Apps do not currently accept Data Agents as item elements (the service
+# rejects itemType "DataAgent"/"AISkill"), so the app surfaces the report only; the
+# Data Agent is still deployed and can be used directly from the workspace.
 $tokens["REPORT_LOGICAL_ID"] = $REPORT_LOGICAL_ID
-$tokens["AGENT_LOGICAL_ID"] = $AGENT_LOGICAL_ID
 
 $orgAppPath = Join-Path $ScriptRoot "Aether\Aether App.OrgApp\definition.json"
 $orgAppContent = Get-Content $orgAppPath -Raw
 $orgAppContent = Replace-Placeholders -Content $orgAppContent -Tokens $tokens
 
-$orgAppResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Aether App" -Type "OrgApp" -Format "orgApp" -Parts @(
+$orgAppResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Aether App" -Type "OrgApp" -Parts @(
     @{ path = "definition.json"; payload = (Get-Base64String $orgAppContent); payloadType = "InlineBase64" }
 )
 

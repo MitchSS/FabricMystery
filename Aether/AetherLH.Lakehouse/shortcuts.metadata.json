@@ -6,7 +6,7 @@
       "target": {
         "oneLake": {
           "workspaceId": "{{WORKSPACE_ID}}",
-          "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+          "itemId": "{{EVENTHOUSE_ARTIFACT_ID}}",
           "path": "Tables/SecurityLogs"
         }
       }
@@ -17,7 +17,7 @@
       "target": {
         "oneLake": {
           "workspaceId": "{{WORKSPACE_ID}}",
-          "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+          "itemId": "{{EVENTHOUSE_ARTIFACT_ID}}",
           "path": "Tables/Communications"
         }
       }
@@ -28,7 +28,7 @@
       "target": {
         "oneLake": {
           "workspaceId": "{{WORKSPACE_ID}}",
-          "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+          "itemId": "{{EVENTHOUSE_ARTIFACT_ID}}",
           "path": "Tables/VictimCalendar"
         }
       }
@@ -39,7 +39,7 @@
       "target": {
         "oneLake": {
           "workspaceId": "{{WORKSPACE_ID}}",
-          "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+          "itemId": "{{EVENTHOUSE_ARTIFACT_ID}}",
           "path": "Tables/SupplierRecords"
         }
       }
