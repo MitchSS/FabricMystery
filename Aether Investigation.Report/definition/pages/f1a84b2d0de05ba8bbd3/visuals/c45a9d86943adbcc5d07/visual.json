@@ -1,0 +1,58 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "c45a9d86943adbcc5d07",
+  "position": {
+    "x": 701.48031496062993,
+    "y": 55.433070866141733,
+    "z": 7000,
+    "height": 51.401574803149607,
+    "width": 562.3937007874016,
+    "tabOrder": 6000
+  },
+  "visual": {
+    "visualType": "card",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "dimperson"
+                        }
+                      },
+                      "Property": "PersonName"
+                    }
+                  },
+                  "Function": 3
+                }
+              },
+              "queryRef": "Min(dimperson.PersonName)",
+              "nativeQueryRef": "PersonName"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "categoryLabels": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

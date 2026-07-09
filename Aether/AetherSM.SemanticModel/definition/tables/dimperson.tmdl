@@ -2,7 +2,7 @@ table dimperson
 	lineageTag: 6a3b8c2d-4e5f-7a9b-1c2d-3e4f5a6b7c8d
 	sourceLineageTag: [dbo].[dimperson]
 
-	measure ImageColumn =
+	measure ImageURI =
 			```
 			SELECTEDVALUE(dimperson[ImageURL])
 			```

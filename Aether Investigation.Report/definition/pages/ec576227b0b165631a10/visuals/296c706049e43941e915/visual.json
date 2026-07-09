@@ -1,0 +1,38 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "296c706049e43941e915",
+  "position": {
+    "x": 9.7879204253539633,
+    "y": 0,
+    "z": 0,
+    "height": 61.174502658462274,
+    "width": 1269.9826751896767
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "The Ghost in the Aether",
+                    "textStyle": {
+                      "fontFamily": "Tahoma",
+                      "fontStyle": "italic",
+                      "fontSize": "24pt"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "center"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Aether Investigation"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "43072554-a438-ae05-4e2d-52ead35a094c"
+  }
+}

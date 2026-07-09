@@ -1,0 +1,135 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.2.0/schema.json",
+  "name": "4d4f136512a1e75a2c90",
+  "position": {
+    "x": 10.078740157480315,
+    "y": 0,
+    "z": 0,
+    "height": 526.11023622047242,
+    "width": 1126.8031496062993
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierRecords"
+                    }
+                  },
+                  "Property": "Supplier"
+                }
+              },
+              "queryRef": "SupplierRecords.Supplier",
+              "nativeQueryRef": "Supplier"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierRecords"
+                    }
+                  },
+                  "Property": "ItemCode"
+                }
+              },
+              "queryRef": "SupplierRecords.ItemCode",
+              "nativeQueryRef": "ItemCode"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierRecords"
+                    }
+                  },
+                  "Property": "ItemDescription"
+                }
+              },
+              "queryRef": "SupplierRecords.ItemDescription",
+              "nativeQueryRef": "ItemDescription"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierRecords"
+                    }
+                  },
+                  "Property": "Notes"
+                }
+              },
+              "queryRef": "SupplierRecords.Notes",
+              "nativeQueryRef": "Notes"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "SupplierRecords"
+                    }
+                  },
+                  "Property": "OrderDate"
+                }
+              },
+              "queryRef": "SupplierRecords.OrderDate",
+              "nativeQueryRef": "OrderDate"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "SupplierRecords"
+                        }
+                      },
+                      "Property": "Quantity"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(SupplierRecords.Quantity)",
+              "nativeQueryRef": "Quantity",
+              "displayName": "Quantity"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Aggregation": {
+                "Expression": {
+                  "Column": {
+                    "Expression": {
+                      "SourceRef": {
+                        "Entity": "SupplierRecords"
+                      }
+                    },
+                    "Property": "Quantity"
+                  }
+                },
+                "Function": 0
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
+      }
+    },
+    "drillFilterOtherVisuals": true
+  }
+}
