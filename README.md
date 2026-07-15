@@ -10,6 +10,7 @@
 | **Azure CLI** | `az` installed and authenticated (`az login`) |
 | **PowerShell 7+** | Cross-platform; ships with Windows |
 | **Fabric permissions** | Ability to create workspaces on the target capacity |
+| **Public repo (for images)** | Character portraits are served from `raw.githubusercontent.com`, so the repo (or your fork) must be **public** for images to render. See [Character Images](#character-images). |
 | **Microsoft Forms** | A public form for audience voting (optional) |
 
 ## Deployment
@@ -71,6 +72,19 @@ Once the script completes:
 
 3. **Open the App** — Navigate to the workspace in the Fabric portal and launch "Aether App" for the player experience.
 
+## Character Images
+
+Character portraits (and the Aetherium Estate image) live in this repo under `images/` and are referenced by URL rather than embedded in the data:
+
+| Asset | Location |
+|-------|----------|
+| Character portraits | `images/persons/*.png` |
+| Estate image | `images/locations/aetherium-estate.png` |
+
+The **Populate Lakehouse** notebook (step 6) writes these as `raw.githubusercontent.com` URLs into the `dimperson.ImageURL` column. Because the column is tagged with the `ImageUrl` data category, the Semantic Model and the Investigation Report render the portraits directly from the data.
+
+> **The repo must be public for images to render.** `raw.githubusercontent.com` URLs return `404` for anonymous requests against a private repo, so Power BI can't fetch them. If you fork the project, update the `IMG_BASE` URL in the Populate Lakehouse notebook to point at your fork/branch.
+
 ## Redeployment & Cleanup
 
 The script does **not** support incremental updates — it expects a fresh workspace. To redeploy:
@@ -88,6 +102,7 @@ The script does **not** support incremental updates — it expects a fresh works
 | Workspace creation fails | Ensure you have capacity admin rights and the `-CapacityId` is correct |
 | Notebook job times out | Check capacity isn't throttled; default timeout is 10 minutes |
 | Shortcuts fail | Eventhouse must be fully provisioned (script waits 5s, but busy capacities may need longer) |
+| Character images don't render | The repo (or your fork) must be **public** — `raw.githubusercontent.com` URLs 404 for private repos. Also confirm `IMG_BASE` in the Populate Lakehouse notebook points at the correct fork/branch. |
 | Audience Votes page is empty | Verify Forms is syncing to Excel, "Votes Mirror" is configured, and the Eventhouse shortcut points to the mirrored `Votes` table |
 
 ## Architecture
