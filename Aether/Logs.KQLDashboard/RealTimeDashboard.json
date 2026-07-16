@@ -1,121 +1,320 @@
 {
-  "schema": "RealTimeDashboard",
-  "version": 1,
-  "dataSourcesMetadata": [
-    {
-      "id": "aether-eventhouse",
-      "name": "AetherEH",
-      "kind": "kusto",
-      "clusterUri": "{{EVENTHOUSE_CLUSTER_URI}}",
-      "database": "AetherEH"
-    }
-  ],
+  "schema_version": 76,
+  "title": "Logs",
   "pages": [
     {
-      "id": "page-security",
-      "name": "Security Logs",
-      "tiles": [
-        {
-          "id": "tile-sec-timeline",
-          "title": "Security Events Timeline",
-          "kind": "timechart",
-          "dataSourceId": "aether-eventhouse",
-          "query": "SecurityLogs\n| summarize EventCount = count() by bin(Timestamp, 1m), EventType\n| render timechart",
-          "layout": { "x": 0, "y": 0, "width": 12, "height": 4 }
-        },
-        {
-          "id": "tile-sec-by-person",
-          "title": "Events by Person",
-          "kind": "barchart",
-          "dataSourceId": "aether-eventhouse",
-          "query": "SecurityLogs\n| summarize EventCount = count() by PersonID\n| render barchart",
-          "layout": { "x": 0, "y": 4, "width": 6, "height": 4 }
-        },
-        {
-          "id": "tile-sec-by-location",
-          "title": "Events by Location",
-          "kind": "piechart",
-          "dataSourceId": "aether-eventhouse",
-          "query": "SecurityLogs\n| summarize EventCount = count() by LocationID\n| render piechart",
-          "layout": { "x": 6, "y": 4, "width": 6, "height": 4 }
-        },
-        {
-          "id": "tile-sec-suspicious",
-          "title": "Suspicious Events",
-          "kind": "table",
-          "dataSourceId": "aether-eventhouse",
-          "query": "SecurityLogs\n| where EventType has 'suspicious' or EventType has 'alert'\n| project Timestamp, PersonID, LocationID, EventType\n| order by Timestamp desc\n| take 50",
-          "layout": { "x": 0, "y": 8, "width": 12, "height": 4 }
-        }
-      ]
+      "id": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "name": "Security Logs"
     },
     {
-      "id": "page-comms",
-      "name": "Communications",
-      "tiles": [
-        {
-          "id": "tile-comms-timeline",
-          "title": "Communications Timeline",
-          "kind": "timechart",
-          "dataSourceId": "aether-eventhouse",
-          "query": "Communications\n| summarize MsgCount = count() by bin(Timestamp, 1m), CommsType\n| render timechart",
-          "layout": { "x": 0, "y": 0, "width": 12, "height": 4 }
-        },
-        {
-          "id": "tile-comms-network",
-          "title": "Communication Network",
-          "kind": "table",
-          "dataSourceId": "aether-eventhouse",
-          "query": "Communications\n| summarize MessageCount = count() by Sender, Recipient\n| order by MessageCount desc",
-          "layout": { "x": 0, "y": 4, "width": 6, "height": 4 }
-        },
-        {
-          "id": "tile-comms-sentiment",
-          "title": "Message Status",
-          "kind": "barchart",
-          "dataSourceId": "aether-eventhouse",
-          "query": "Communications\n| summarize Count = count() by Status\n| render barchart",
-          "layout": { "x": 6, "y": 4, "width": 6, "height": 4 }
-        },
-        {
-          "id": "tile-comms-detail",
-          "title": "Recent Messages",
-          "kind": "table",
-          "dataSourceId": "aether-eventhouse",
-          "query": "Communications\n| project Timestamp, Sender, Recipient, CommsType, Subject, Status\n| order by Timestamp desc\n| take 50",
-          "layout": { "x": 0, "y": 8, "width": 12, "height": 4 }
-        }
-      ]
+      "id": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
+      "name": "Communications"
     },
     {
-      "id": "page-audience-votes",
-      "name": "Audience Votes",
-      "tiles": [
-        {
-          "id": "tile-audience-votes-bar",
-          "title": "Audience Votes",
-          "kind": "barchart",
-          "dataSourceId": "aether-eventhouse",
-          "query": "Votes\n| summarize VoteCount = count() by Suspect\n| order by VoteCount desc\n| render barchart",
-          "layout": { "x": 0, "y": 0, "width": 8, "height": 4 }
-        },
-        {
-          "id": "tile-audience-confidence",
-          "title": "Average Confidence by Suspect",
-          "kind": "barchart",
-          "dataSourceId": "aether-eventhouse",
-          "query": "Votes\n| summarize AvgConfidence = avg(Confidence), VoteCount = count() by Suspect\n| order by VoteCount desc\n| render barchart",
-          "layout": { "x": 8, "y": 0, "width": 4, "height": 4 }
-        },
-        {
-          "id": "tile-audience-recent",
-          "title": "Recent Audience Guesses",
-          "kind": "table",
-          "dataSourceId": "aether-eventhouse",
-          "query": "Votes\n| project Timestamp, Suspect, Confidence, Motive\n| order by Timestamp desc\n| take 25",
-          "layout": { "x": 0, "y": 4, "width": 12, "height": 4 }
-        }
-      ]
+      "id": "8daf9d99-653a-475f-bcde-9cc57f517629",
+      "name": "Audience Votes"
     }
-  ]
+  ],
+  "dataSources": [
+    {
+      "id": "57a3d956-526b-4774-8f3d-1e58597da6be",
+      "database": "AetherEH",
+      "kind": "manual-kusto",
+      "name": "AetherEH",
+      "clusterUri": "{{EVENTHOUSE_CLUSTER_URI}}"
+    }
+  ],
+  "queries": [
+    {
+      "id": "61eb2019-2fde-40fa-9793-4e204e611433",
+      "text": "SecurityLogs\n| summarize EventCount = count() by bin(Timestamp, 1m), EventType",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    },
+    {
+      "id": "0d5ae7f7-8c14-4ccb-90f0-7bcacc14f51e",
+      "text": "SecurityLogs\n| summarize EventCount = count() by PersonID",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    },
+    {
+      "id": "887695dd-ad12-49a2-887e-cf86414b38f8",
+      "text": "SecurityLogs\n| summarize EventCount = count() by LocationID",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    },
+    {
+      "id": "ce14a2b0-f228-4ecf-82b6-a9349589ceeb",
+      "text": "SecurityLogs\n| where EventType has 'suspicious' or EventType has 'alert'\n| project Timestamp, PersonID, LocationID, EventType\n| order by Timestamp desc\n| take 50",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    },
+    {
+      "id": "cbc890e6-1e57-4ba3-9c2e-d8cc71daf863",
+      "text": "Communications\n| summarize MsgCount = count() by bin(Timestamp, 1m), CommsType",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    },
+    {
+      "id": "95baca0b-e01b-4baa-883d-2c349f2582f5",
+      "text": "Communications\n| summarize MessageCount = count() by Sender, Recipient\n| order by MessageCount desc",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    },
+    {
+      "id": "79b4ac8e-5a16-4c63-959e-4111be2a8d13",
+      "text": "Communications\n| summarize Count = count() by Status",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    },
+    {
+      "id": "7a106b07-54c0-4b67-bdc7-c051c095fe95",
+      "text": "Communications\n| project Timestamp, Sender, Recipient, CommsType, Subject, Status\n| order by Timestamp desc\n| take 50",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    },
+    {
+      "id": "a1ab922f-3220-45fb-a317-ed041f9a0e50",
+      "text": "Votes\n| summarize VoteCount = count() by Suspect\n| order by VoteCount desc",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    },
+    {
+      "id": "1f39f830-822e-46a4-a2e5-0d8f83e8df94",
+      "text": "Votes\n| summarize AvgConfidence = avg(Confidence), VoteCount = count() by Suspect\n| order by VoteCount desc",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    },
+    {
+      "id": "c304b5bc-88de-470d-ad81-089b3ceb73de",
+      "text": "Votes\n| project Timestamp, Suspect, Confidence, Motive\n| order by Timestamp desc\n| take 25",
+      "usedVariables": [],
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      }
+    }
+  ],
+  "tiles": [
+    {
+      "id": "6db45f0f-f45e-4444-a553-4fb1c3266f28",
+      "title": "Security Events Timeline",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 4
+      },
+      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "visualType": "line",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "61eb2019-2fde-40fa-9793-4e204e611433"
+      }
+    },
+    {
+      "id": "81e6f9ee-312c-4f89-84ba-94414923bbfa",
+      "title": "Events by Person",
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 6,
+        "height": 4
+      },
+      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "visualType": "bar",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "0d5ae7f7-8c14-4ccb-90f0-7bcacc14f51e"
+      }
+    },
+    {
+      "id": "a2435f2b-a186-4718-b094-8d80be7d964c",
+      "title": "Events by Location",
+      "layout": {
+        "x": 6,
+        "y": 4,
+        "width": 6,
+        "height": 4
+      },
+      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "visualType": "pie",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "887695dd-ad12-49a2-887e-cf86414b38f8"
+      }
+    },
+    {
+      "id": "2c592542-3f05-4ce9-9eba-5648ed30defb",
+      "title": "Suspicious Events",
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 4
+      },
+      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "visualType": "table",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "ce14a2b0-f228-4ecf-82b6-a9349589ceeb"
+      }
+    },
+    {
+      "id": "cec76986-3550-44ff-87bb-36f69fb05410",
+      "title": "Communications Timeline",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 4
+      },
+      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
+      "visualType": "line",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "cbc890e6-1e57-4ba3-9c2e-d8cc71daf863"
+      }
+    },
+    {
+      "id": "1752279a-22d6-469a-969e-a45c4250c79c",
+      "title": "Communication Network",
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 6,
+        "height": 4
+      },
+      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
+      "visualType": "table",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "95baca0b-e01b-4baa-883d-2c349f2582f5"
+      }
+    },
+    {
+      "id": "bc8d7747-434d-45a0-abc3-9ffe0566c6d1",
+      "title": "Message Status",
+      "layout": {
+        "x": 6,
+        "y": 4,
+        "width": 6,
+        "height": 4
+      },
+      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
+      "visualType": "bar",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "79b4ac8e-5a16-4c63-959e-4111be2a8d13"
+      }
+    },
+    {
+      "id": "51cceac8-f545-42f1-9f76-dc33b5dd7369",
+      "title": "Recent Messages",
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 4
+      },
+      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
+      "visualType": "table",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "7a106b07-54c0-4b67-bdc7-c051c095fe95"
+      }
+    },
+    {
+      "id": "86a723bb-a847-4865-8bdd-bbc0fdf1ef6b",
+      "title": "Audience Votes",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 8,
+        "height": 4
+      },
+      "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
+      "visualType": "bar",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "a1ab922f-3220-45fb-a317-ed041f9a0e50"
+      }
+    },
+    {
+      "id": "e4f831d6-ccde-4559-b7d9-daee1062a3ab",
+      "title": "Average Confidence by Suspect",
+      "layout": {
+        "x": 8,
+        "y": 0,
+        "width": 4,
+        "height": 4
+      },
+      "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
+      "visualType": "bar",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "1f39f830-822e-46a4-a2e5-0d8f83e8df94"
+      }
+    },
+    {
+      "id": "63111766-c182-4004-a43d-5f94b8eb439b",
+      "title": "Recent Audience Guesses",
+      "layout": {
+        "x": 0,
+        "y": 4,
+        "width": 12,
+        "height": 4
+      },
+      "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
+      "visualType": "table",
+      "visualOptions": {},
+      "queryRef": {
+        "kind": "query",
+        "queryId": "c304b5bc-88de-470d-ad81-089b3ceb73de"
+      }
+    }
+  ],
+  "parameters": [],
+  "baseQueries": [],
+  "embeddedApps": []
 }
