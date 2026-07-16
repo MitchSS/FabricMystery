@@ -430,3 +430,6 @@ FodyWeavers.xsd
 
 # Ignore the entire .vscode folder (overrides the whitelist above)
 .vscode/
+
+# Local personal notes (form URLs, scratch)
+LOCAL_NOTES.md
