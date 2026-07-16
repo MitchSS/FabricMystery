@@ -427,3 +427,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Ignore the entire .vscode folder (overrides the whitelist above)
+.vscode/
