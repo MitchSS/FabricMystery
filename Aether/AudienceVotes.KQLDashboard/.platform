@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "config": {
+    "logicalId": "32929b80-6a9b-4251-9fd7-68bd3246b429",
+    "version": "2.0"
+  },
+  "metadata": {
+    "displayName": "Audience Votes",
+    "type": "KQLDashboard"
+  }
+}

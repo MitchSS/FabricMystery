@@ -515,6 +515,14 @@ $dashResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Logs" -Type "KQLDash
     @{ path = "RealTimeDashboard.json"; payload = (Get-Base64String $dashContent); payloadType = "InlineBase64" }
 )
 
+$audDashPath = Join-Path $ScriptRoot "Aether\AudienceVotes.KQLDashboard\RealTimeDashboard.json"
+$audDashContent = Get-Content $audDashPath -Raw
+$audDashContent = Replace-Placeholders -Content $audDashContent -Tokens $tokens
+
+$audDashResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Audience Votes" -Type "KQLDashboard" -Parts @(
+    @{ path = "RealTimeDashboard.json"; payload = (Get-Base64String $audDashContent); payloadType = "InlineBase64" }
+)
+
 # --- Step 11: Deploy Data Agent ---
 Write-Host "[11/15] Deploying Data Agent"
 
@@ -659,6 +667,7 @@ Write-Host "  Investigation:    $INV_REPORT_ID"
 Write-Host "  Logs Report:      $LOGS_REPORT_ID"
 Write-Host "  Data Agent:       $DA_ID"
 Write-Host "  KQL Dashboard:    $($dashResult.id)"
+Write-Host "  Audience Votes:   $($audDashResult.id)"
 Write-Host "  Org App:          $($orgAppResult.id)"
 Write-Host "  Event Simulator:  $($simNb.id)"
 Write-Host "  Votes Mirror:     $MIRROR_ID"

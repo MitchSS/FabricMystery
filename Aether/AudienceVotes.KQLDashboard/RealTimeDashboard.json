@@ -1,0 +1,103 @@
+{
+  "schema_version": 77,
+  "tiles": [
+    {
+      "id": "86a723bb-a847-4865-8bdd-bbc0fdf1ef6b",
+      "title": "Audience Votes",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 11,
+        "height": 6
+      },
+      "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
+      "visualType": "bar",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "a1ab922f-3220-45fb-a317-ed041f9a0e50"
+      },
+      "visualOptions": {}
+    },
+    {
+      "id": "e4f831d6-ccde-4559-b7d9-daee1062a3ab",
+      "title": "Average Confidence by Suspect",
+      "layout": {
+        "x": 11,
+        "y": 0,
+        "width": 13,
+        "height": 6
+      },
+      "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
+      "visualType": "bar",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "1f39f830-822e-46a4-a2e5-0d8f83e8df94"
+      },
+      "visualOptions": {}
+    },
+    {
+      "id": "63111766-c182-4004-a43d-5f94b8eb439b",
+      "title": "Recent Audience Guesses",
+      "layout": {
+        "x": 0,
+        "y": 6,
+        "width": 24,
+        "height": 13
+      },
+      "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
+      "visualType": "table",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "c304b5bc-88de-470d-ad81-089b3ceb73de"
+      },
+      "visualOptions": {}
+    }
+  ],
+  "baseQueries": [],
+  "parameters": [],
+  "dataSources": [
+    {
+      "id": "57a3d956-526b-4774-8f3d-1e58597da6be",
+      "database": "AetherEH",
+      "kind": "manual-kusto",
+      "name": "AetherEH",
+      "clusterUri": "{{EVENTHOUSE_CLUSTER_URI}}"
+    }
+  ],
+  "pages": [
+    {
+      "id": "8daf9d99-653a-475f-bcde-9cc57f517629",
+      "name": "Audience Votes"
+    }
+  ],
+  "queries": [
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      },
+      "text": "Votes\n| summarize VoteCount = count() by Suspect\n| order by VoteCount desc",
+      "id": "a1ab922f-3220-45fb-a317-ed041f9a0e50",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      },
+      "text": "Votes\n| summarize AvgConfidence = avg(Confidence), VoteCount = count() by Suspect\n| order by VoteCount desc",
+      "id": "1f39f830-822e-46a4-a2e5-0d8f83e8df94",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      },
+      "text": "Votes\n| project Timestamp, Suspect, Confidence, Motive\n| order by Timestamp desc\n| take 25",
+      "id": "c304b5bc-88de-470d-ad81-089b3ceb73de",
+      "usedVariables": []
+    }
+  ],
+  "embeddedApps": []
+}

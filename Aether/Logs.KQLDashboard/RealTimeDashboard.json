@@ -1,20 +1,145 @@
 {
-  "schema_version": 76,
-  "title": "Logs",
-  "pages": [
+  "schema_version": 77,
+  "tiles": [
     {
-      "id": "6a90bead-cf22-49df-95a1-f7c100f92894",
-      "name": "Security Logs"
+      "id": "6db45f0f-f45e-4444-a553-4fb1c3266f28",
+      "title": "Security Events Timeline",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      },
+      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "visualType": "line",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "61eb2019-2fde-40fa-9793-4e204e611433"
+      },
+      "visualOptions": {}
     },
     {
-      "id": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
-      "name": "Communications"
+      "id": "81e6f9ee-312c-4f89-84ba-94414923bbfa",
+      "title": "Events by Person",
+      "layout": {
+        "x": 12,
+        "y": 4,
+        "width": 12,
+        "height": 4
+      },
+      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "visualType": "bar",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "0d5ae7f7-8c14-4ccb-90f0-7bcacc14f51e"
+      },
+      "visualOptions": {}
     },
     {
-      "id": "8daf9d99-653a-475f-bcde-9cc57f517629",
-      "name": "Audience Votes"
+      "id": "a2435f2b-a186-4718-b094-8d80be7d964c",
+      "title": "Events by Location",
+      "layout": {
+        "x": 12,
+        "y": 0,
+        "width": 12,
+        "height": 4
+      },
+      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "visualType": "pie",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "887695dd-ad12-49a2-887e-cf86414b38f8"
+      },
+      "visualOptions": {}
+    },
+    {
+      "id": "2c592542-3f05-4ce9-9eba-5648ed30defb",
+      "title": "Suspicious Events",
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 24,
+        "height": 8
+      },
+      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "visualType": "table",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "ce14a2b0-f228-4ecf-82b6-a9349589ceeb"
+      },
+      "visualOptions": {}
+    },
+    {
+      "id": "cec76986-3550-44ff-87bb-36f69fb05410",
+      "title": "Communications Timeline",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 8
+      },
+      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
+      "visualType": "line",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "cbc890e6-1e57-4ba3-9c2e-d8cc71daf863"
+      },
+      "visualOptions": {}
+    },
+    {
+      "id": "1752279a-22d6-469a-969e-a45c4250c79c",
+      "title": "Communication Network",
+      "layout": {
+        "x": 12,
+        "y": 4,
+        "width": 12,
+        "height": 4
+      },
+      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
+      "visualType": "table",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "95baca0b-e01b-4baa-883d-2c349f2582f5"
+      },
+      "visualOptions": {}
+    },
+    {
+      "id": "bc8d7747-434d-45a0-abc3-9ffe0566c6d1",
+      "title": "Message Status",
+      "layout": {
+        "x": 12,
+        "y": 0,
+        "width": 12,
+        "height": 4
+      },
+      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
+      "visualType": "bar",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "79b4ac8e-5a16-4c63-959e-4111be2a8d13"
+      },
+      "visualOptions": {}
+    },
+    {
+      "id": "51cceac8-f545-42f1-9f76-dc33b5dd7369",
+      "title": "Recent Messages",
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 24,
+        "height": 9
+      },
+      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
+      "visualType": "table",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "7a106b07-54c0-4b67-bdc7-c051c095fe95"
+      },
+      "visualOptions": {}
     }
   ],
+  "baseQueries": [],
+  "parameters": [],
   "dataSources": [
     {
       "id": "57a3d956-526b-4774-8f3d-1e58597da6be",
@@ -24,297 +149,89 @@
       "clusterUri": "{{EVENTHOUSE_CLUSTER_URI}}"
     }
   ],
+  "pages": [
+    {
+      "id": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "name": "Security Logs"
+    },
+    {
+      "id": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
+      "name": "Communications"
+    }
+  ],
   "queries": [
     {
-      "id": "61eb2019-2fde-40fa-9793-4e204e611433",
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      },
       "text": "SecurityLogs\n| summarize EventCount = count() by bin(Timestamp, 1m), EventType",
-      "usedVariables": [],
+      "id": "61eb2019-2fde-40fa-9793-4e204e611433",
+      "usedVariables": []
+    },
+    {
       "dataSource": {
         "kind": "inline",
         "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
-    },
-    {
-      "id": "0d5ae7f7-8c14-4ccb-90f0-7bcacc14f51e",
+      },
       "text": "SecurityLogs\n| summarize EventCount = count() by PersonID",
-      "usedVariables": [],
+      "id": "0d5ae7f7-8c14-4ccb-90f0-7bcacc14f51e",
+      "usedVariables": []
+    },
+    {
       "dataSource": {
         "kind": "inline",
         "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
-    },
-    {
+      },
+      "text": "SecurityLogs\n| summarize EventCount = count() by LocationID = tostring(LocationID)",
       "id": "887695dd-ad12-49a2-887e-cf86414b38f8",
-      "text": "SecurityLogs\n| summarize EventCount = count() by LocationID",
-      "usedVariables": [],
+      "usedVariables": []
+    },
+    {
       "dataSource": {
         "kind": "inline",
         "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
-    },
-    {
-      "id": "ce14a2b0-f228-4ecf-82b6-a9349589ceeb",
+      },
       "text": "SecurityLogs\n| where EventType has 'suspicious' or EventType has 'alert'\n| project Timestamp, PersonID, LocationID, EventType\n| order by Timestamp desc\n| take 50",
-      "usedVariables": [],
+      "id": "ce14a2b0-f228-4ecf-82b6-a9349589ceeb",
+      "usedVariables": []
+    },
+    {
       "dataSource": {
         "kind": "inline",
         "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
-    },
-    {
-      "id": "cbc890e6-1e57-4ba3-9c2e-d8cc71daf863",
+      },
       "text": "Communications\n| summarize MsgCount = count() by bin(Timestamp, 1m), CommsType",
-      "usedVariables": [],
+      "id": "cbc890e6-1e57-4ba3-9c2e-d8cc71daf863",
+      "usedVariables": []
+    },
+    {
       "dataSource": {
         "kind": "inline",
         "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
-    },
-    {
-      "id": "95baca0b-e01b-4baa-883d-2c349f2582f5",
+      },
       "text": "Communications\n| summarize MessageCount = count() by Sender, Recipient\n| order by MessageCount desc",
-      "usedVariables": [],
+      "id": "95baca0b-e01b-4baa-883d-2c349f2582f5",
+      "usedVariables": []
+    },
+    {
       "dataSource": {
         "kind": "inline",
         "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
-    },
-    {
-      "id": "79b4ac8e-5a16-4c63-959e-4111be2a8d13",
+      },
       "text": "Communications\n| summarize Count = count() by Status",
-      "usedVariables": [],
+      "id": "79b4ac8e-5a16-4c63-959e-4111be2a8d13",
+      "usedVariables": []
+    },
+    {
       "dataSource": {
         "kind": "inline",
         "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
-    },
-    {
-      "id": "7a106b07-54c0-4b67-bdc7-c051c095fe95",
+      },
       "text": "Communications\n| project Timestamp, Sender, Recipient, CommsType, Subject, Status\n| order by Timestamp desc\n| take 50",
-      "usedVariables": [],
-      "dataSource": {
-        "kind": "inline",
-        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
-    },
-    {
-      "id": "a1ab922f-3220-45fb-a317-ed041f9a0e50",
-      "text": "Votes\n| summarize VoteCount = count() by Suspect\n| order by VoteCount desc",
-      "usedVariables": [],
-      "dataSource": {
-        "kind": "inline",
-        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
-    },
-    {
-      "id": "1f39f830-822e-46a4-a2e5-0d8f83e8df94",
-      "text": "Votes\n| summarize AvgConfidence = avg(Confidence), VoteCount = count() by Suspect\n| order by VoteCount desc",
-      "usedVariables": [],
-      "dataSource": {
-        "kind": "inline",
-        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
-    },
-    {
-      "id": "c304b5bc-88de-470d-ad81-089b3ceb73de",
-      "text": "Votes\n| project Timestamp, Suspect, Confidence, Motive\n| order by Timestamp desc\n| take 25",
-      "usedVariables": [],
-      "dataSource": {
-        "kind": "inline",
-        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
-      }
+      "id": "7a106b07-54c0-4b67-bdc7-c051c095fe95",
+      "usedVariables": []
     }
   ],
-  "tiles": [
-    {
-      "id": "6db45f0f-f45e-4444-a553-4fb1c3266f28",
-      "title": "Security Events Timeline",
-      "layout": {
-        "x": 0,
-        "y": 0,
-        "width": 12,
-        "height": 4
-      },
-      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
-      "visualType": "line",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "61eb2019-2fde-40fa-9793-4e204e611433"
-      }
-    },
-    {
-      "id": "81e6f9ee-312c-4f89-84ba-94414923bbfa",
-      "title": "Events by Person",
-      "layout": {
-        "x": 0,
-        "y": 4,
-        "width": 6,
-        "height": 4
-      },
-      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
-      "visualType": "bar",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "0d5ae7f7-8c14-4ccb-90f0-7bcacc14f51e"
-      }
-    },
-    {
-      "id": "a2435f2b-a186-4718-b094-8d80be7d964c",
-      "title": "Events by Location",
-      "layout": {
-        "x": 6,
-        "y": 4,
-        "width": 6,
-        "height": 4
-      },
-      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
-      "visualType": "pie",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "887695dd-ad12-49a2-887e-cf86414b38f8"
-      }
-    },
-    {
-      "id": "2c592542-3f05-4ce9-9eba-5648ed30defb",
-      "title": "Suspicious Events",
-      "layout": {
-        "x": 0,
-        "y": 8,
-        "width": 12,
-        "height": 4
-      },
-      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
-      "visualType": "table",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "ce14a2b0-f228-4ecf-82b6-a9349589ceeb"
-      }
-    },
-    {
-      "id": "cec76986-3550-44ff-87bb-36f69fb05410",
-      "title": "Communications Timeline",
-      "layout": {
-        "x": 0,
-        "y": 0,
-        "width": 12,
-        "height": 4
-      },
-      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
-      "visualType": "line",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "cbc890e6-1e57-4ba3-9c2e-d8cc71daf863"
-      }
-    },
-    {
-      "id": "1752279a-22d6-469a-969e-a45c4250c79c",
-      "title": "Communication Network",
-      "layout": {
-        "x": 0,
-        "y": 4,
-        "width": 6,
-        "height": 4
-      },
-      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
-      "visualType": "table",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "95baca0b-e01b-4baa-883d-2c349f2582f5"
-      }
-    },
-    {
-      "id": "bc8d7747-434d-45a0-abc3-9ffe0566c6d1",
-      "title": "Message Status",
-      "layout": {
-        "x": 6,
-        "y": 4,
-        "width": 6,
-        "height": 4
-      },
-      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
-      "visualType": "bar",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "79b4ac8e-5a16-4c63-959e-4111be2a8d13"
-      }
-    },
-    {
-      "id": "51cceac8-f545-42f1-9f76-dc33b5dd7369",
-      "title": "Recent Messages",
-      "layout": {
-        "x": 0,
-        "y": 8,
-        "width": 12,
-        "height": 4
-      },
-      "pageId": "9d739f6c-9fe1-4cbf-8bde-5d420ebe8a1b",
-      "visualType": "table",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "7a106b07-54c0-4b67-bdc7-c051c095fe95"
-      }
-    },
-    {
-      "id": "86a723bb-a847-4865-8bdd-bbc0fdf1ef6b",
-      "title": "Audience Votes",
-      "layout": {
-        "x": 0,
-        "y": 0,
-        "width": 8,
-        "height": 4
-      },
-      "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
-      "visualType": "bar",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "a1ab922f-3220-45fb-a317-ed041f9a0e50"
-      }
-    },
-    {
-      "id": "e4f831d6-ccde-4559-b7d9-daee1062a3ab",
-      "title": "Average Confidence by Suspect",
-      "layout": {
-        "x": 8,
-        "y": 0,
-        "width": 4,
-        "height": 4
-      },
-      "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
-      "visualType": "bar",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "1f39f830-822e-46a4-a2e5-0d8f83e8df94"
-      }
-    },
-    {
-      "id": "63111766-c182-4004-a43d-5f94b8eb439b",
-      "title": "Recent Audience Guesses",
-      "layout": {
-        "x": 0,
-        "y": 4,
-        "width": 12,
-        "height": 4
-      },
-      "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
-      "visualType": "table",
-      "visualOptions": {},
-      "queryRef": {
-        "kind": "query",
-        "queryId": "c304b5bc-88de-470d-ad81-089b3ceb73de"
-      }
-    }
-  ],
-  "parameters": [],
-  "baseQueries": [],
   "embeddedApps": []
 }
