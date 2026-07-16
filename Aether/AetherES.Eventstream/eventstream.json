@@ -45,9 +45,26 @@
           }
         }
       },
+    },
+    {
+      "name": "VotesDest",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "ProcessedIngestion",
+        "workspaceId": "{{WORKSPACE_ID}}",
+        "itemId": "{{EVENTHOUSE_ARTIFACT_ID}}",
+        "databaseName": "AetherEH",
+        "tableName": "Votes",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": {
+            "encoding": "UTF8"
+          }
+        }
+      },
       "inputNodes": [
         {
-          "name": "CommsFilter"
+          "name": "VotesFilter"
         }
       ]
     }
@@ -113,6 +130,33 @@
             "value": {
               "dataType": "Nvarchar(max)",
               "value": "Communications",
+              "expressionType": "Literal"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "VotesFilter",
+      "type": "Filter",
+      "inputNodes": [
+        {
+          "name": "AetherStream-stream"
+        }
+      ],
+      "properties": {
+        "conditions": [
+          {
+            "column": {
+              "node": null,
+              "columnName": "event_type",
+              "columnPath": null,
+              "expressionType": "ColumnReference"
+            },
+            "operatorType": "Equals",
+            "value": {
+              "dataType": "Nvarchar(max)",
+              "value": "Votes",
               "expressionType": "Literal"
             }
           }

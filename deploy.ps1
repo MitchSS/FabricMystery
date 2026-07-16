@@ -21,7 +21,23 @@ param(
     [string]$WorkspaceName = "Fabric Mystery UG",
 
     [Parameter(Mandatory = $false)]
-    [string]$CapacityId = ""
+    [string]$CapacityId = "",
+
+    # --- Audience Votes Logic App (Consumption) ---
+    [Parameter(Mandatory = $false)]
+    [string]$ResourceGroup = "rg-fabricmystery",
+
+    [Parameter(Mandatory = $false)]
+    [string]$Region = "uksouth",
+
+    [Parameter(Mandatory = $false)]
+    [string]$VotesFormId = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$VotesSuspectQuestionId = "",
+
+    [Parameter(Mandatory = $false)]
+    [string]$VotesNameQuestionId = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -633,18 +649,67 @@ $simNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Event Simulator" -Type "N
 
 Write-Host "  NOTE: Event Simulator is NOT auto-run. Start it manually when ready for the demo."
 
-# --- Step 15: Create Mirrored Database for audience votes ---
-Write-Host "[15/15] Creating Mirrored Database for audience votes"
+# --- Step 15: Deploy Audience Votes Logic App (MS Form -> Eventstream -> Votes table) ---
+Write-Host "[15/15] Deploying Audience Votes Logic App"
 
-$mirrorBody = @{
-    displayName = "Votes Mirror"
-    type        = "MirroredDatabase"
+# Pattern credited to https://github.com/liamhowlett/fabric-rti-livesurvey
+# The Logic App fires on each new Microsoft Forms response, reads the answer, and
+# sends a JSON event (event_type="Votes") to the AetherES Eventstream custom endpoint.
+# The Eventstream's VotesFilter routes it into the Eventhouse "Votes" table.
+
+$LOGIC_APP_ID = $null
+if (-not $EVENTHUB_CONN) {
+    Write-Host "  SKIPPED: No Eventstream connection string available (see Step 13)."
+    Write-Host "           Re-run once the Eventstream custom endpoint is ready to deploy the Votes Logic App."
 }
-$mirrorResult = Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WS_ID/items" -Body $mirrorBody
-$MIRROR_ID = $mirrorResult.id
-Write-Host "  Created: Votes Mirror (MirroredDatabase) -> $MIRROR_ID"
-Write-Host "  NOTE: In the Fabric portal, configure 'Votes Mirror' to point at the OneDrive Excel file synced from Microsoft Forms."
-Write-Host "  NOTE: After mirroring is configured, create a shortcut in the AetherEH KQL Database so the dashboard's Votes queries resolve to the mirrored table."
+else {
+    # The Event Hubs 'Send event' action needs the entity (hub) name separately from
+    # the connection string. Parse EntityPath=es_<guid> out of the connection string.
+    $eventHubName = ""
+    if ($EVENTHUB_CONN -match "EntityPath=([^;]+)") {
+        $eventHubName = $Matches[1]
+    }
+
+    if (-not $eventHubName) {
+        Write-Host "  WARNING: Could not parse EntityPath from the Eventstream connection string; skipping Logic App deploy."
+    }
+    else {
+        # Ensure the target resource group exists.
+        $rgExists = az group exists --name $ResourceGroup 2>$null
+        if ($rgExists -ne "true") {
+            Write-Host "  Creating resource group '$ResourceGroup' in '$Region'"
+            az group create --name $ResourceGroup --location $Region | Out-Null
+        }
+
+        $bicepPath = Join-Path $ScriptRoot "infra\votes-logicapp.bicep"
+        Write-Host "  Deploying Logic App + API connections via Bicep"
+        $deployName = "aether-votes-$([DateTime]::UtcNow.ToString('yyyyMMddHHmmss'))"
+        $deployOut = az deployment group create `
+            --name $deployName `
+            --resource-group $ResourceGroup `
+            --template-file $bicepPath `
+            --parameters `
+                location=$Region `
+                eventHubConnectionString=$EVENTHUB_CONN `
+                eventHubName=$eventHubName `
+                formId=$VotesFormId `
+                suspectQuestionId=$VotesSuspectQuestionId `
+                nameQuestionId=$VotesNameQuestionId `
+            --query "properties.outputs" -o json 2>&1
+
+        if ($LASTEXITCODE -eq 0) {
+            try { $LOGIC_APP_ID = ($deployOut | ConvertFrom-Json).logicAppResourceId.value } catch { }
+            Write-Host "  Deployed: Audience Votes Logic App -> $LOGIC_APP_ID"
+        }
+        else {
+            Write-Host "  WARNING: Logic App deployment failed:"
+            Write-Host "  $deployOut"
+        }
+    }
+}
+
+Write-Host "  NOTE: In the Azure portal, open the 'aether-forms' API connection and click 'Authorize' (one-time Microsoft Forms OAuth consent)."
+Write-Host "  NOTE: If the form id / question ids were not supplied, open the Logic App designer and bind the Suspect answer, then Save."
 
 # ============================================================
 # Summary
@@ -670,13 +735,13 @@ Write-Host "  KQL Dashboard:    $($dashResult.id)"
 Write-Host "  Audience Votes:   $($audDashResult.id)"
 Write-Host "  Org App:          $($orgAppResult.id)"
 Write-Host "  Event Simulator:  $($simNb.id)"
-Write-Host "  Votes Mirror:     $MIRROR_ID"
+Write-Host "  Votes Logic App:  $LOGIC_APP_ID"
 Write-Host ""
 Write-Host "Portal: https://app.fabric.microsoft.com/groups/$WS_ID"
 Write-Host ""
 Write-Host "Next Steps:"
 Write-Host "  1. Set AETHER_EVENTHUB_CONNECTION_STRING in the Event Simulator notebook"
 Write-Host "  2. Run Event Simulator to begin the live demo"
-Write-Host "  3. Create a public MS Form, enable 'sync responses to Excel' in OneDrive"
-Write-Host "  4. In the Fabric portal, open 'Votes Mirror' and configure the landing zone to point at the Excel file"
-Write-Host "  5. Submit a test response and verify it appears in the mirrored database"
+Write-Host "  3. In the Azure portal, authorize the 'aether-forms' API connection (one-time Forms OAuth)"
+Write-Host "  4. In the Logic App designer, confirm the form id and bind the Suspect answer, then Save"
+Write-Host "  5. Submit a test form response and verify it lands in the Eventhouse 'Votes' table and the Audience Votes dashboard"

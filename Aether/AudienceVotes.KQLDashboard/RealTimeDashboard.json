@@ -20,7 +20,7 @@
     },
     {
       "id": "e4f831d6-ccde-4559-b7d9-daee1062a3ab",
-      "title": "Average Confidence by Suspect",
+      "title": "Votes Over Time",
       "layout": {
         "x": 11,
         "y": 0,
@@ -28,7 +28,7 @@
         "height": 6
       },
       "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
-      "visualType": "bar",
+      "visualType": "line",
       "queryRef": {
         "kind": "query",
         "queryId": "1f39f830-822e-46a4-a2e5-0d8f83e8df94"
@@ -85,7 +85,7 @@
         "kind": "inline",
         "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
       },
-      "text": "Votes\n| summarize AvgConfidence = avg(Confidence), VoteCount = count() by Suspect\n| order by VoteCount desc",
+      "text": "Votes\n| summarize Votes = count() by bin(Timestamp, 1m)\n| order by Timestamp asc",
       "id": "1f39f830-822e-46a4-a2e5-0d8f83e8df94",
       "usedVariables": []
     },
@@ -94,7 +94,7 @@
         "kind": "inline",
         "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
       },
-      "text": "Votes\n| project Timestamp, Suspect, Confidence, Motive\n| order by Timestamp desc\n| take 25",
+      "text": "Votes\n| project Timestamp, VoterName, Suspect\n| order by Timestamp desc\n| take 25",
       "id": "c304b5bc-88de-470d-ad81-089b3ceb73de",
       "usedVariables": []
     }

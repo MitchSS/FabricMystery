@@ -10,12 +10,13 @@
 | **Azure CLI** | `az` installed and authenticated (`az login`) |
 | **PowerShell 7+** | Cross-platform; ships with Windows |
 | **Fabric permissions** | Ability to create workspaces on the target capacity |
+| **Azure subscription** | Rights to create a resource group + Logic App (Consumption) for audience voting |
 | **Public repo (for images)** | Character portraits are served from `raw.githubusercontent.com`, so the repo (or your fork) must be **public** for images to render. See [Character Images](#character-images). |
 | **Microsoft Forms** | A public form for audience voting (optional) |
 
 ## Deployment
 
-The included `deploy.ps1` script creates the core Fabric items in the correct dependency order using the Fabric REST API. A small amount of post-deployment portal setup is still required for Open Mirroring.
+The included `deploy.ps1` script creates the core Fabric items in the correct dependency order using the Fabric REST API. It also deploys an Azure Logic App (Consumption) that streams Microsoft Forms votes into the Eventhouse. A small amount of post-deployment portal setup (authorizing the Forms connection) is still required.
 
 ### Quick Start
 
@@ -34,6 +35,11 @@ cd FabricMystery
 |-----------|----------|---------|-------------|
 | `-WorkspaceName` | No | `"Fabric Mystery UG"` | Target workspace name. Created if it doesn't exist. |
 | `-CapacityId` | No* | `""` | Fabric capacity GUID. *Required when creating a new workspace. |
+| `-ResourceGroup` | No | `"rg-fabricmystery"` | Azure resource group for the Audience Votes Logic App. Created if it doesn't exist. |
+| `-Region` | No | `"uksouth"` | Azure region for the Logic App and its API connections. |
+| `-VotesFormId` | No | `""` | Microsoft Forms form id (long id from the form edit URL). Can be bound later in the Logic App designer. |
+| `-VotesSuspectQuestionId` | No | `""` | Forms question id for the Suspect vote. Can be bound later in the designer. |
+| `-VotesNameQuestionId` | No | `""` | Forms question id for the voter Name. Falls back to responder email if blank. |
 
 ### What the Script Does (15 Steps)
 
@@ -53,7 +59,7 @@ cd FabricMystery
 | 12 | Deploy Org App (`Aether App`) |
 | 13 | Deploy Eventstream (`AetherES`) + auto-fetch Event Hub connection string |
 | 14 | Deploy Event Simulator notebook (connection string injected automatically) |
-| 15 | Create Mirrored Database (Votes Mirror) |
+| 15 | Deploy Audience Votes Logic App (MS Form → Eventstream → `Votes` table) |
 
 ### Post-Deployment Setup
 
@@ -61,15 +67,11 @@ Once the script completes:
 
 1. **Event Simulator** — The Event Hub connection string is injected automatically from the `AetherES` Eventstream during deployment, so no manual configuration is needed. Just open the notebook in Fabric and run it to start streaming events. (To point it at a different Event Hub for a manual run, set the `AETHER_EVENTHUB_CONNECTION_STRING` environment variable, which overrides the injected value.)
 
-2. **Audience Voting (Open Mirroring)** — Set up the live voting pipeline:
-   1. Create a public Microsoft Form with:
-      - Question 1: "Who did it?" (choice: Evelyn Reed, Marcus Thorne, Anya Sharma, Dr. Alistair Finch)
-      - Question 2: "Confidence?" (rating 1–5)
-      - Question 3: "What was the motive?" (free text)
-   2. In Forms settings, enable "Sync responses to Excel" (saves to OneDrive)
-   3. In the Fabric portal, open "Votes Mirror" → configure the landing zone to read from the OneDrive Excel file
-   4. Create a shortcut in the AetherEH KQL Database pointing to the mirrored `Votes` table
-   5. Submit a test response and verify it appears on the "Audience Votes" dashboard
+2. **Audience Voting (Real-Time via Logic App)** — The live voting pipeline uses a Microsoft Form → Azure Logic App → Eventstream → Eventhouse `Votes` table → `Audience Votes` dashboard. This pattern is credited to [liamhowlett/fabric-rti-livesurvey](https://github.com/liamhowlett/fabric-rti-livesurvey). To finish wiring it up:
+   1. Create a Microsoft Form with a "Who did it?" choice question (Evelyn Reed, Marcus Thorne, Anya Sharma, Dr. Alistair Finch). Optionally add a "Your name" question.
+   2. In the Azure portal, open the `aether-forms` API connection and click **Authorize** (one-time Microsoft Forms OAuth consent).
+   3. Open the `aether-votes-logicapp` Logic App in the designer. Confirm the form is selected in the trigger, bind the **Suspect** answer (and optionally **Name**) in the "Send vote to Eventstream" action, then **Save**. (You can also pass `-VotesFormId` / `-VotesSuspectQuestionId` / `-VotesNameQuestionId` to `deploy.ps1` to skip this binding.)
+   4. Submit a test response and verify it lands in the Eventhouse `Votes` table and appears on the "Audience Votes" dashboard.
 
 3. **Open the App** — Navigate to the workspace in the Fabric portal and launch "Aether App" for the player experience.
 
@@ -104,7 +106,7 @@ The script does **not** support incremental updates — it expects a fresh works
 | Notebook job times out | Check capacity isn't throttled; default timeout is 10 minutes |
 | Shortcuts fail | Eventhouse must be fully provisioned (script waits 5s, but busy capacities may need longer) |
 | Character images don't render | The repo (or your fork) must be **public** — `raw.githubusercontent.com` URLs 404 for private repos. Also confirm `IMG_BASE` in the Populate Lakehouse notebook points at the correct fork/branch. |
-| Audience Votes dashboard is empty | Verify Forms is syncing to Excel, "Votes Mirror" is configured, and the Eventhouse shortcut points to the mirrored `Votes` table |
+| Audience Votes dashboard is empty | Verify the `aether-forms` API connection is authorized, the Logic App run history shows successful runs, and events are reaching the Eventhouse `Votes` table |
 
 ## Architecture
 
@@ -113,7 +115,6 @@ flowchart LR
     subgraph Data["Data Layer"]
         EH[Eventhouse: AetherEH]
         LH[Lakehouse: AetherLH]
-        MIRROR[Mirrored DB:\nVotes Mirror]
         EH -->|Delta Table Shortcuts| LH
     end
 
@@ -125,6 +126,7 @@ flowchart LR
 
     subgraph Ingestion["Ingestion"]
         ES[Eventstream: AetherES]
+        LA[Logic App:\nAudience Votes]
     end
 
     subgraph Analytics["Analytics"]
@@ -150,8 +152,8 @@ flowchart LR
     ES -->|Filter by event_type| EH
     REB --> SM
     AUDIENCE --> FORMS
-    FORMS -->|Excel sync| MIRROR
-    MIRROR -->|Shortcut| EH
+    FORMS -->|On submit| LA
+    LA -->|Send event: event_type=Votes| ES
 
     LH --> SM
     EH --> KD
@@ -188,7 +190,7 @@ flowchart TD
     K --> L
     B --> ES2[13. Eventstream AetherES]
     ES2 --> M[14. Event Simulator Notebook]
-    A --> N[15. Mirrored Database]
+    ES2 --> N[15. Audience Votes Logic App]
 
     style F stroke:#107C10,stroke-width:2px
     style H stroke:#107C10,stroke-width:2px

@@ -46,11 +46,13 @@
 )
 
 // --- Audience Votes ---
-// Live "whodunit" guesses collected from MS Forms during the demo
+// Live "whodunit" guesses collected from MS Forms during the demo.
+// Streamed in via: MS Form -> Azure Logic App -> AetherES CustomEndpoint -> this table.
+// Pattern credited to https://github.com/liamhowlett/fabric-rti-livesurvey
+// The form only captures the suspect vote, so this table is Suspect-only.
 .create-merge table Votes (
     ResponseId: string,
     Timestamp: datetime,
-    Suspect: string,
-    Confidence: int,
-    Motive: string
+    VoterName: string,
+    Suspect: string
 )

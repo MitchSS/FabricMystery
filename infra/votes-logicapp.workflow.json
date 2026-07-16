@@ -1,0 +1,84 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$connections": {
+      "type": "Object",
+      "defaultValue": {}
+    },
+    "formId": {
+      "type": "String",
+      "defaultValue": ""
+    },
+    "eventHubName": {
+      "type": "String",
+      "defaultValue": ""
+    },
+    "suspectQuestionId": {
+      "type": "String",
+      "defaultValue": ""
+    },
+    "nameQuestionId": {
+      "type": "String",
+      "defaultValue": ""
+    }
+  },
+  "triggers": {
+    "When_a_new_response_is_submitted": {
+      "type": "ApiConnectionWebhook",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['microsoftforms']['connectionId']"
+          }
+        },
+        "body": {
+          "eventType": "responseAdded",
+          "notificationUrl": "@{listCallbackUrl()}",
+          "source": "ms-connector"
+        },
+        "path": "/formapi/api/forms/@{encodeURIComponent(parameters('formId'))}/webhooks"
+      },
+      "splitOn": "@triggerBody()?['value']"
+    }
+  },
+  "actions": {
+    "Get_response_details": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['microsoftforms']['connectionId']"
+          }
+        },
+        "method": "get",
+        "path": "/formapi/api/forms('@{encodeURIComponent(parameters('formId'))}')/responses",
+        "queries": {
+          "response_id": "@triggerBody()?['resourceData']?['responseId']"
+        }
+      },
+      "runAfter": {}
+    },
+    "Send_vote_to_Eventstream": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['eventhubs']['connectionId']"
+          }
+        },
+        "method": "post",
+        "path": "/@{encodeURIComponent(parameters('eventHubName'))}/events",
+        "body": {
+          "ContentData": "@{base64(concat('{\"event_type\":\"Votes\",\"ResponseId\":\"', string(triggerBody()?['resourceData']?['responseId']), '\",\"Timestamp\":\"', utcNow(), '\",\"VoterName\":\"', coalesce(body('Get_response_details')?[parameters('nameQuestionId')], body('Get_response_details')?['responder'], ''), '\",\"Suspect\":\"', coalesce(body('Get_response_details')?[parameters('suspectQuestionId')], ''), '\"}'))}"
+        }
+      },
+      "runAfter": {
+        "Get_response_details": [
+          "Succeeded"
+        ]
+      }
+    }
+  },
+  "outputs": {}
+}
