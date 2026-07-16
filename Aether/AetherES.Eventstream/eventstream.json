@@ -13,7 +13,7 @@
       "properties": {
         "dataIngestionMode": "ProcessedIngestion",
         "workspaceId": "{{WORKSPACE_ID}}",
-        "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+        "itemId": "{{EVENTHOUSE_ARTIFACT_ID}}",
         "databaseName": "AetherEH",
         "tableName": "SecurityLogs",
         "inputSerialization": {
@@ -35,7 +35,7 @@
       "properties": {
         "dataIngestionMode": "ProcessedIngestion",
         "workspaceId": "{{WORKSPACE_ID}}",
-        "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+        "itemId": "{{EVENTHOUSE_ARTIFACT_ID}}",
         "databaseName": "AetherEH",
         "tableName": "Communications",
         "inputSerialization": {
