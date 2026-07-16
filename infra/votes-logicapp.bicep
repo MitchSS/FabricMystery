@@ -36,6 +36,9 @@ param formId string = ''
 @description('Optional. The Forms question id that captures the Suspect vote. Bind in the designer after deploy if left blank.')
 param suspectQuestionId string = ''
 
+@description('Optional. The Forms question id that captures the Vote Section / voting round (e.g. "Final Vote").')
+param voteSectionQuestionId string = ''
+
 @description('Optional. The Forms question id that captures the voter Name. Falls back to the responder email if left blank.')
 param nameQuestionId string = ''
 
@@ -98,6 +101,9 @@ resource votesWorkflow 'Microsoft.Logic/workflows@2019-05-01' = {
       }
       suspectQuestionId: {
         value: suspectQuestionId
+      }
+      voteSectionQuestionId: {
+        value: voteSectionQuestionId
       }
       nameQuestionId: {
         value: nameQuestionId

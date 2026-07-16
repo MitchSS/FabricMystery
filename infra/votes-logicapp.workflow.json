@@ -18,6 +18,10 @@
       "type": "String",
       "defaultValue": ""
     },
+    "voteSectionQuestionId": {
+      "type": "String",
+      "defaultValue": ""
+    },
     "nameQuestionId": {
       "type": "String",
       "defaultValue": ""
@@ -70,7 +74,7 @@
         "method": "post",
         "path": "/@{encodeURIComponent(parameters('eventHubName'))}/events",
         "body": {
-          "ContentData": "@{base64(concat('{\"event_type\":\"Votes\",\"ResponseId\":\"', string(triggerBody()?['resourceData']?['responseId']), '\",\"Timestamp\":\"', utcNow(), '\",\"VoterName\":\"', coalesce(body('Get_response_details')?[parameters('nameQuestionId')], body('Get_response_details')?['responder'], ''), '\",\"Suspect\":\"', coalesce(body('Get_response_details')?[parameters('suspectQuestionId')], ''), '\"}'))}"
+          "ContentData": "@{base64(concat('{\"event_type\":\"Votes\",\"ResponseId\":\"', string(triggerBody()?['resourceData']?['responseId']), '\",\"Timestamp\":\"', utcNow(), '\",\"VoterName\":\"', coalesce(body('Get_response_details')?[parameters('nameQuestionId')], body('Get_response_details')?['responder'], ''), '\",\"VoteSection\":\"', coalesce(body('Get_response_details')?[parameters('voteSectionQuestionId')], ''), '\",\"Suspect\":\"', coalesce(body('Get_response_details')?[parameters('suspectQuestionId')], ''), '\"}'))}"
         }
       },
       "runAfter": {

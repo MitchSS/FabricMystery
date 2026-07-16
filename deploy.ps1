@@ -37,6 +37,9 @@ param(
     [string]$VotesSuspectQuestionId = "",
 
     [Parameter(Mandatory = $false)]
+    [string]$VotesVoteSectionQuestionId = "",
+
+    [Parameter(Mandatory = $false)]
     [string]$VotesNameQuestionId = ""
 )
 
@@ -694,6 +697,7 @@ else {
                 eventHubName=$eventHubName `
                 formId=$VotesFormId `
                 suspectQuestionId=$VotesSuspectQuestionId `
+                voteSectionQuestionId=$VotesVoteSectionQuestionId `
                 nameQuestionId=$VotesNameQuestionId `
             --query "properties.outputs" -o json 2>&1
 

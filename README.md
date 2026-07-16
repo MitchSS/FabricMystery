@@ -39,6 +39,7 @@ cd FabricMystery
 | `-Region` | No | `"uksouth"` | Azure region for the Logic App and its API connections. |
 | `-VotesFormId` | No | `""` | Microsoft Forms form id (long id from the form edit URL). Can be bound later in the Logic App designer. |
 | `-VotesSuspectQuestionId` | No | `""` | Forms question id for the Suspect vote. Can be bound later in the designer. |
+| `-VotesVoteSectionQuestionId` | No | `""` | Forms question id for the Vote Section / voting round (e.g. "Final Vote"). |
 | `-VotesNameQuestionId` | No | `""` | Forms question id for the voter Name. Falls back to responder email if blank. |
 
 ### What the Script Does (15 Steps)
@@ -75,6 +76,7 @@ Once the script completes:
    |-----------|------------|---------------------|
    | `formId` | The long id of **your** Microsoft Form (not the `/r/…` short link). | `-VotesFormId` |
    | `suspectQuestionId` | The Forms question id (e.g. `r8a1c…`) that holds the "Who did it?" answer. | `-VotesSuspectQuestionId` |
+   | `voteSectionQuestionId` | *Optional.* The question id for the Vote Section / voting round (e.g. "Final Vote"). | `-VotesVoteSectionQuestionId` |
    | `nameQuestionId` | *Optional.* The question id for the voter's name. Falls back to the responder's email if blank. | `-VotesNameQuestionId` |
 
    Forms' *Get response details* returns answers keyed by **question id**, not friendly names, and you can't know those ids until one response exists — so the reliable order is: set the form id → authorize → submit one test → read the ids from the run → paste them in.
