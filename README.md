@@ -35,7 +35,7 @@ cd FabricMystery
 | `-WorkspaceName` | No | `"Fabric Mystery UG"` | Target workspace name. Created if it doesn't exist. |
 | `-CapacityId` | No* | `""` | Fabric capacity GUID. *Required when creating a new workspace. |
 
-### What the Script Does (14 Steps)
+### What the Script Does (15 Steps)
 
 | Step | Action |
 |------|--------|
@@ -48,7 +48,7 @@ cd FabricMystery
 | 7 | Deploy Semantic Model (`AetherSM` — Direct Lake) |
 | 8 | Deploy & run Rebind Semantic Model notebook |
 | 9 | Deploy Reports (`Aether Investigation`, `Logs`) — rebound to the deployed Semantic Model |
-| 10 | Deploy KQL Dashboard (Security Logs, Communications, Audience Votes) |
+| 10 | Deploy KQL Dashboards — `Logs` (Security Logs, Communications) and `Audience Votes` (its own dashboard) |
 | 11 | Deploy Data Agent (`AetherDA`) |
 | 12 | Deploy Org App (`Aether App`) |
 | 13 | Deploy Eventstream (`AetherES`) + auto-fetch Event Hub connection string |
@@ -69,7 +69,7 @@ Once the script completes:
    2. In Forms settings, enable "Sync responses to Excel" (saves to OneDrive)
    3. In the Fabric portal, open "Votes Mirror" → configure the landing zone to read from the OneDrive Excel file
    4. Create a shortcut in the AetherEH KQL Database pointing to the mirrored `Votes` table
-   5. Submit a test response and verify it appears in the KQL Dashboard's "Audience Votes" page
+   5. Submit a test response and verify it appears on the "Audience Votes" dashboard
 
 3. **Open the App** — Navigate to the workspace in the Fabric portal and launch "Aether App" for the player experience.
 
@@ -104,7 +104,7 @@ The script does **not** support incremental updates — it expects a fresh works
 | Notebook job times out | Check capacity isn't throttled; default timeout is 10 minutes |
 | Shortcuts fail | Eventhouse must be fully provisioned (script waits 5s, but busy capacities may need longer) |
 | Character images don't render | The repo (or your fork) must be **public** — `raw.githubusercontent.com` URLs 404 for private repos. Also confirm `IMG_BASE` in the Populate Lakehouse notebook points at the correct fork/branch. |
-| Audience Votes page is empty | Verify Forms is syncing to Excel, "Votes Mirror" is configured, and the Eventhouse shortcut points to the mirrored `Votes` table |
+| Audience Votes dashboard is empty | Verify Forms is syncing to Excel, "Votes Mirror" is configured, and the Eventhouse shortcut points to the mirrored `Votes` table |
 
 ## Architecture
 
@@ -129,7 +129,8 @@ flowchart LR
 
     subgraph Analytics["Analytics"]
         SM[Semantic Model: AetherSM\nDirect Lake]
-        KD[KQL Dashboard:\nLogs + Votes]
+        KD[KQL Dashboard:\nLogs]
+        VD[KQL Dashboard:\nAudience Votes]
     end
 
     subgraph Experience["Player Experience"]
@@ -154,6 +155,7 @@ flowchart LR
 
     LH --> SM
     EH --> KD
+    EH --> VD
     EH --> DA
     LH --> DA
     SM --> R1
@@ -162,6 +164,7 @@ flowchart LR
     R2 --> APP
     DA --> APP
     KD --> APP
+    VD --> APP
 ```
 
 ## Deployment Dependencies
@@ -177,7 +180,7 @@ flowchart TD
     F --> G[7. Semantic Model]
     G --> H[8. Rebind Notebook ▶]
     G --> I[9. Reports]
-    D --> J[10. KQL Dashboard]
+    D --> J[10. KQL Dashboards]
     B --> K[11. Data Agent]
     C --> K
     I --> L[12. Org App]
