@@ -1,5 +1,5 @@
 {
-  "name": "Copilot_Theme",
+  "name": "Copilot_Theme6416345582579971",
   "dataColors": [
     "#118DFF",
     "#12239E",
@@ -12,27 +12,27 @@
   ],
   "textClasses": {
     "callout": {
-      "fontSize": "20",
+      "fontSize": 20,
       "fontFace": "Segoe UI Semibold",
       "color": "#000000"
     },
     "header": {
-      "fontSize": "12",
+      "fontSize": 12,
       "fontFace": "Segoe UI Semibold",
       "color": "#000000"
     },
     "title": {
-      "fontSize": "12",
+      "fontSize": 12,
       "fontFace": "Segoe UI Semibold",
       "color": "#000000"
     },
     "largeTitle": {
-      "fontSize": "10",
+      "fontSize": 10,
       "fontFace": "Segoe UI Semibold",
       "color": "#000000"
     },
     "label": {
-      "fontSize": "10",
+      "fontSize": 10,
       "fontFace": "Segoe UI",
       "color": "#000000"
     }
