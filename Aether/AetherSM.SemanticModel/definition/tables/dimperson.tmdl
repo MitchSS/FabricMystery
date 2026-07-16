@@ -2,10 +2,7 @@ table dimperson
 	lineageTag: 6a3b8c2d-4e5f-7a9b-1c2d-3e4f5a6b7c8d
 	sourceLineageTag: [dbo].[dimperson]
 
-	measure ImageURI =
-			```
-			SELECTEDVALUE(dimperson[ImageURL])
-			```
+	measure ImageURI = SELECTEDVALUE(dimperson[ImageURL])
 		lineageTag: 93e8366c-a245-492d-a8db-eede1d3889cc
 		dataCategory: ImageUrl
 
@@ -13,10 +10,7 @@ table dimperson
 
 		changedProperty = DataCategory
 
-	measure SelectedBio =
-			```
-			SELECTEDVALUE(dimperson[ExtendedBio], "Select a person to view their bio.")
-			```
+	measure SelectedBio = SELECTEDVALUE(dimperson[ExtendedBio], "Select a person to view their bio.")
 		lineageTag: d7c9326f-e076-408a-8d0b-9e93ae1444af
 
 		changedProperty = Name
