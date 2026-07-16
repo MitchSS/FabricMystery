@@ -45,7 +45,7 @@
         "height": 4
       },
       "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
-      "visualType": "pie",
+      "visualType": "bar",
       "queryRef": {
         "kind": "query",
         "queryId": "887695dd-ad12-49a2-887e-cf86414b38f8"
