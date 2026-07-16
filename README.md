@@ -51,14 +51,15 @@ cd FabricMystery
 | 10 | Deploy KQL Dashboard (Security Logs, Communications, Audience Votes) |
 | 11 | Deploy Data Agent (`AetherDA`) |
 | 12 | Deploy Org App (`Aether App`) |
-| 13 | Deploy Event Simulator notebook |
-| 14 | Create Mirrored Database (Votes Mirror) |
+| 13 | Deploy Eventstream (`AetherES`) + auto-fetch Event Hub connection string |
+| 14 | Deploy Event Simulator notebook (connection string injected automatically) |
+| 15 | Create Mirrored Database (Votes Mirror) |
 
 ### Post-Deployment Setup
 
 Once the script completes:
 
-1. **Event Simulator** — Open the notebook in Fabric, set the `AETHER_EVENTHUB_CONNECTION_STRING` environment variable, then run it to start streaming events.
+1. **Event Simulator** — The Event Hub connection string is injected automatically from the `AetherES` Eventstream during deployment, so no manual configuration is needed. Just open the notebook in Fabric and run it to start streaming events. (To point it at a different Event Hub for a manual run, set the `AETHER_EVENTHUB_CONNECTION_STRING` environment variable, which overrides the injected value.)
 
 2. **Audience Voting (Open Mirroring)** — Set up the live voting pipeline:
    1. Create a public Microsoft Form with:
@@ -122,6 +123,10 @@ flowchart LR
         REB[Rebind Semantic Model]
     end
 
+    subgraph Ingestion["Ingestion"]
+        ES[Eventstream: AetherES]
+    end
+
     subgraph Analytics["Analytics"]
         SM[Semantic Model: AetherSM\nDirect Lake]
         KD[KQL Dashboard:\nLogs + Votes]
@@ -140,7 +145,8 @@ flowchart LR
     end
 
     POP --> LH
-    SIM -->|Event Hub| EH
+    SIM -->|Event Hub connection| ES
+    ES -->|Filter by event_type| EH
     REB --> SM
     AUDIENCE --> FORMS
     FORMS -->|Excel sync| MIRROR
@@ -177,8 +183,9 @@ flowchart TD
     I --> L[12. Org App]
     J --> L
     K --> L
-    A --> M[13. Event Simulator Notebook]
-    A --> N[14. Mirrored Database]
+    B --> ES2[13. Eventstream AetherES]
+    ES2 --> M[14. Event Simulator Notebook]
+    A --> N[15. Mirrored Database]
 
     style F stroke:#107C10,stroke-width:2px
     style H stroke:#107C10,stroke-width:2px

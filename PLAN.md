@@ -64,8 +64,9 @@ flowchart TD
     I --> L[12. Deploy Org App]
     J --> L
     K --> L
-    A --> M[13. Deploy Event Simulator Notebook]
-    A --> N[14. Create Mirrored Database]
+    B --> ES[13. Deploy Eventstream AetherES]
+    ES --> M[14. Deploy Event Simulator Notebook]
+    A --> N[15. Create Mirrored Database]
 ```
 
 Key constraints:
@@ -132,6 +133,9 @@ FabricMystery/
 │   │   └── notebook.ipynb
 │   ├── Event Simulator.Notebook/
 │   │   └── notebook.ipynb
+│   ├── AetherES.Eventstream/
+│   │   ├── .platform
+│   │   └── eventstream.json
 │   ├── Rebind Semantic Model.Notebook/
 │   │   └── notebook.ipynb
 │   └── Aether App.OrgApp/
@@ -207,6 +211,10 @@ flowchart LR
         REB[Rebind Semantic Model Notebook]
     end
 
+    subgraph Ingestion
+        ES[Eventstream: AetherES]
+    end
+
     subgraph Analytics
         SM[Direct Lake Semantic Model: AetherSM]
         KD[KQL Dashboard: Logs + Votes]
@@ -224,7 +232,8 @@ flowchart LR
     end
 
     POP --> LH
-    SIM -->|Event Hub| EH
+    SIM -->|Event Hub connection| ES
+    ES -->|Filter by event_type| EH
     FORMS -->|Excel sync| MIRROR
     MIRROR -->|Shortcut| EH
     EH -->|Delta Table Shortcuts| LH
@@ -242,7 +251,7 @@ flowchart LR
 
 ### Data Flow
 1. **Populate Lakehouse** notebook inserts static dimension data (persons, locations, evidence) into the Lakehouse.
-2. **Event Simulator** notebook publishes real-time events (SecurityLogs, Communications) to an Event Hub endpoint → ingested by Eventhouse.
+2. **Event Simulator** notebook publishes real-time events (SecurityLogs, Communications) to the `AetherES` Eventstream's CustomEndpoint (Event Hub compatible). The Eventstream filters by `event_type` and routes each stream into the matching Eventhouse table. The connection string is fetched and injected into the notebook automatically at deploy time.
 3. **Audience voting** uses Microsoft Forms → OneDrive Excel sync → Open Mirroring into `Votes Mirror`.
 4. **Shortcut configuration** exposes the mirrored `Votes` table to the `AetherEH` KQL database so the dashboard can keep querying `Votes`.
 5. **Delta Table Shortcuts** bridge 4 Eventhouse tables (SecurityLogs, Communications, VictimCalendar, SupplierRecords) into the Lakehouse as tables.
@@ -324,9 +333,9 @@ flowchart LR
 ### Step 10: Build Event Simulator Notebook
 - Install: `azure-eventhub`
 - Configuration:
-  - Connection string via environment variable `AETHER_EVENTHUB_CONNECTION_STRING`
+  - Connection string injected automatically at deploy time from the `AetherES` Eventstream (env var `AETHER_EVENTHUB_CONNECTION_STRING` overrides for manual runs)
   - 400 total events, batch size 20, noise rate 35%
-  - COMPRESSED mode with configurable speed
+  - COMPRESSED mode with configurable speed; `SCRIPTED_ONLY` toggle to stream only milestone beats
 - Scripted milestones (key narrative beats):
   1. **Offset 0** — Julian enters study; Evelyn emails about code ownership
   2. **Offset 45** — Marcus detected near study; threatening text to Julian
@@ -387,7 +396,8 @@ flowchart LR
 - [ ] Logs report built and connected
 - [ ] KQL Dashboard created and connected
 - [ ] Data Agent configured with persona and data sources
-- [ ] Event Simulator notebook configured with Event Hub connection
+- [ ] Eventstream (`AetherES`) deployed and Event Hub connection string fetched
+- [ ] Event Simulator notebook deployed with connection string injected automatically
 - [ ] Rebind notebook run to connect semantic model to lakehouse
 - [ ] Org App created wrapping all player-facing items
 - [ ] Event Simulator test run completed — events visible in KQL dashboard
@@ -398,7 +408,7 @@ flowchart LR
 
 | Setting | Value |
 |---------|-------|
-| Event Hub connection string | Environment variable: `AETHER_EVENTHUB_CONNECTION_STRING` |
+| Event Hub connection string | Auto-injected from `AetherES` Eventstream at deploy time (override: env var `AETHER_EVENTHUB_CONNECTION_STRING`) |
 | Workspace name | Configurable (default: "Fabric Mystery Demo") |
 | Simulation events | 400 |
 | Simulation mode | COMPRESSED |

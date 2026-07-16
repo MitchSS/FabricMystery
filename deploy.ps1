@@ -288,7 +288,7 @@ Write-Host "============================================================"
 Write-Host ""
 
 # --- Step 1: Resolve or Create Workspace ---
-Write-Host "[1/14] Resolving workspace: $WorkspaceName"
+Write-Host "[1/15] Resolving workspace: $WorkspaceName"
 
 $workspaces = Invoke-FabricApi -Method "GET" -Url "$FabricApi/workspaces?`$filter=displayName eq '$WorkspaceName'"
 $workspace = $workspaces.value | Where-Object { $_.displayName -eq $WorkspaceName } | Select-Object -First 1
@@ -305,7 +305,7 @@ if ($workspace) {
 }
 
 # --- Step 2: Create Eventhouse ---
-Write-Host "[2/14] Creating Eventhouse + KQL Database"
+Write-Host "[2/15] Creating Eventhouse + KQL Database"
 
 $ehResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherEH" -Type "Eventhouse"
 $EH_ID = $ehResult.id
@@ -323,14 +323,14 @@ $CLUSTER_URI = $kqlDbDetail.properties.queryServiceUri
 Write-Host "  Cluster URI: $CLUSTER_URI"
 
 # --- Step 3: Create Lakehouse ---
-Write-Host "[3/14] Creating Lakehouse"
+Write-Host "[3/15] Creating Lakehouse"
 
 $lhResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherLH" -Type "Lakehouse"
 $LH_ID = $lhResult.id
 Write-Host "  Lakehouse ID: $LH_ID"
 
 # --- Step 4: Deploy KQL Schema ---
-Write-Host "[4/14] Deploying KQL Schema"
+Write-Host "[4/15] Deploying KQL Schema"
 
 $schemaPath = Join-Path $ScriptRoot "Aether\AetherEH.Eventhouse\.children\AetherEH.KQLDatabase\DatabaseSchema.kql"
 $schemaContent = Get-Content $schemaPath -Raw
@@ -354,7 +354,7 @@ foreach ($t in $availTables) {
 }
 
 # --- Step 5: Create Shortcuts ---
-Write-Host "[5/14] Creating Shortcuts (Eventhouse -> Lakehouse)"
+Write-Host "[5/15] Creating Shortcuts (Eventhouse -> Lakehouse)"
 
 $tokens = @{
     "WORKSPACE_ID"          = $WS_ID
@@ -399,7 +399,7 @@ foreach ($sc in $shortcuts.shortcuts) {
 }
 
 # --- Step 6: Deploy + Run Populate Notebook ---
-Write-Host "[6/14] Deploying Populate Lakehouse Notebook"
+Write-Host "[6/15] Deploying Populate Lakehouse Notebook"
 
 $popNbPath = Join-Path $ScriptRoot "Aether\Populate Lakehouse.Notebook\notebook.ipynb"
 # Attach AetherLH as the notebook's default lakehouse so %%sql / saveAsTable resolve.
@@ -414,7 +414,7 @@ $jobId = Start-ItemJob -WorkspaceId $WS_ID -ItemId $popNb.id -JobType "RunNotebo
 Wait-ForJob -WorkspaceId $WS_ID -ItemId $popNb.id -JobInstanceId $jobId
 
 # --- Step 7: Deploy Semantic Model ---
-Write-Host "[7/14] Deploying Semantic Model"
+Write-Host "[7/15] Deploying Semantic Model"
 
 # Resolve the Lakehouse SQL analytics endpoint and inject it into the Direct Lake
 # model connection so it binds to this workspace's lakehouse at deploy time.
@@ -463,7 +463,7 @@ $smResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherSM" -Type "Seman
 $SM_ID = $smResult.id
 
 # --- Step 8: Deploy + Run Rebind Notebook ---
-Write-Host "[8/14] Deploying Rebind Semantic Model Notebook"
+Write-Host "[8/15] Deploying Rebind Semantic Model Notebook"
 
 $rebindPath = Join-Path $ScriptRoot "Aether\Rebind Semantic Model.Notebook\notebook.ipynb"
 $rebindContent = Get-Content $rebindPath -Raw
@@ -486,7 +486,7 @@ catch {
 }
 
 # --- Step 9: Deploy Reports ---
-Write-Host "[9/14] Deploying Reports"
+Write-Host "[9/15] Deploying Reports"
 
 $invReportResult = Deploy-Report -WorkspaceId $WS_ID `
     -ReportFolder (Join-Path $ScriptRoot "Aether Investigation.Report") `
@@ -505,7 +505,7 @@ $LOGS_REPORT_ID = $logsReportResult.id
 $REPORT_LOGICAL_ID = $INV_REPORT_ID
 
 # --- Step 10: Deploy KQL Dashboard ---
-Write-Host "[10/14] Deploying KQL Dashboard"
+Write-Host "[10/15] Deploying KQL Dashboard"
 
 $dashPath = Join-Path $ScriptRoot "Aether\Logs.KQLDashboard\RealTimeDashboard.json"
 $dashContent = Get-Content $dashPath -Raw
@@ -516,7 +516,7 @@ $dashResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Logs" -Type "KQLDash
 )
 
 # --- Step 11: Deploy Data Agent ---
-Write-Host "[11/14] Deploying Data Agent"
+Write-Host "[11/15] Deploying Data Agent"
 
 $daConfigDir = Join-Path $ScriptRoot "Aether\AetherDA.DataAgent\Files\Config"
 $daParts = @()
@@ -546,7 +546,7 @@ $daResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherDA" -Type "DataA
 $DA_ID = $daResult.id
 
 # --- Step 12: Deploy Org App ---
-Write-Host "[12/14] Deploying Org App"
+Write-Host "[12/15] Deploying Org App"
 
 # Item elements bind by itemId + folderObjectId (the workspace id is the root folder).
 # NOTE: Org Apps do not currently accept Data Agents as item elements (the service
@@ -562,12 +562,62 @@ $orgAppResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Aether App" -Type 
     @{ path = "definition.json"; payload = (Get-Base64String $orgAppContent); payloadType = "InlineBase64" }
 )
 
-# --- Step 13: Deploy Event Simulator Notebook ---
-Write-Host "[13/14] Deploying Event Simulator Notebook"
+# --- Step 13: Deploy Eventstream (auto-provisions the Event Hub connection) ---
+Write-Host "[13/15] Deploying Eventstream (AetherES)"
+
+$esJsonPath = Join-Path $ScriptRoot "Aether\AetherES.Eventstream\eventstream.json"
+$esPlatformPath = Join-Path $ScriptRoot "Aether\AetherES.Eventstream\.platform"
+$esContent = Get-Content $esJsonPath -Raw
+$esContent = Replace-Placeholders -Content $esContent -Tokens $tokens
+$esPlatformContent = Get-Content $esPlatformPath -Raw
+
+$esItem = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherES" -Type "Eventstream" -Parts @(
+    @{ path = "eventstream.json"; payload = (Get-Base64String $esContent); payloadType = "InlineBase64" }
+    @{ path = ".platform"; payload = (Get-Base64String $esPlatformContent); payloadType = "InlineBase64" }
+)
+$ES_ID = $esItem.id
+
+# The CustomEndpoint source exposes an Event Hub-compatible connection string, which is
+# exactly what the Event Simulator publishes to. Poll the topology for the source id,
+# then fetch its primary connection string so we can inject it into the notebook below.
+$EVENTHUB_CONN = $null
+$esDeadline = (Get-Date).AddSeconds(180)
+while ((Get-Date) -lt $esDeadline) {
+    try {
+        $topology = Invoke-FabricApi -Method "GET" -Url "$FabricApi/workspaces/$WS_ID/eventstreams/$ES_ID/topology"
+        $source = $topology.sources | Where-Object { $_.type -eq "CustomEndpoint" } | Select-Object -First 1
+        if ($source -and $source.id) {
+            $conn = Invoke-FabricApi -Method "GET" -Url "$FabricApi/workspaces/$WS_ID/eventstreams/$ES_ID/sources/$($source.id)/connection"
+            if ($conn.accessKeys.primaryConnectionString) {
+                $EVENTHUB_CONN = $conn.accessKeys.primaryConnectionString
+                break
+            }
+        }
+    }
+    catch {
+        Write-Host "  Eventstream source not ready yet; retrying in 15s..."
+    }
+    Start-Sleep -Seconds 15
+}
+
+if (-not $EVENTHUB_CONN) {
+    Write-Host "  WARNING: Could not retrieve the Eventstream connection string automatically."
+    Write-Host "           Set AETHER_EVENTHUB_CONNECTION_STRING on the Event Simulator before running."
+}
+else {
+    Write-Host "  Retrieved Event Hub connection string from the AetherES CustomEndpoint source."
+}
+
+# --- Step 14: Deploy Event Simulator Notebook ---
+Write-Host "[14/15] Deploying Event Simulator Notebook"
 
 $simPath = Join-Path $ScriptRoot "Aether\Event Simulator.Notebook\notebook.ipynb"
 $simContent = Get-Content $simPath -Raw
 $simContent = $simContent -replace '"id": ""', "`"id`": `"$LH_ID`""
+if ($EVENTHUB_CONN) {
+    # Literal replace (not -replace) so any regex-special chars in the key are safe.
+    $simContent = $simContent.Replace("{{EVENTHUB_CONNECTION_STRING}}", $EVENTHUB_CONN)
+}
 
 $simNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Event Simulator" -Type "Notebook" -Format "ipynb" -Parts @(
     @{ path = "notebook.ipynb"; payload = (Get-Base64String $simContent); payloadType = "InlineBase64" }
@@ -575,8 +625,8 @@ $simNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Event Simulator" -Type "N
 
 Write-Host "  NOTE: Event Simulator is NOT auto-run. Start it manually when ready for the demo."
 
-# --- Step 14: Create Mirrored Database for audience votes ---
-Write-Host "[14/14] Creating Mirrored Database for audience votes"
+# --- Step 15: Create Mirrored Database for audience votes ---
+Write-Host "[15/15] Creating Mirrored Database for audience votes"
 
 $mirrorBody = @{
     displayName = "Votes Mirror"

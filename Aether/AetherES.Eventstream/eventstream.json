@@ -1,0 +1,124 @@
+{
+  "sources": [
+    {
+      "name": "AetherStream",
+      "type": "CustomEndpoint",
+      "properties": {}
+    }
+  ],
+  "destinations": [
+    {
+      "name": "SecurityLogsDest",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "ProcessedIngestion",
+        "workspaceId": "{{WORKSPACE_ID}}",
+        "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+        "databaseName": "AetherEH",
+        "tableName": "SecurityLogs",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": {
+            "encoding": "UTF8"
+          }
+        }
+      },
+      "inputNodes": [
+        {
+          "name": "SecurityFilter"
+        }
+      ]
+    },
+    {
+      "name": "CommunicationsDest",
+      "type": "Eventhouse",
+      "properties": {
+        "dataIngestionMode": "ProcessedIngestion",
+        "workspaceId": "{{WORKSPACE_ID}}",
+        "itemId": "{{EVENTHOUSE_ITEM_ID}}",
+        "databaseName": "AetherEH",
+        "tableName": "Communications",
+        "inputSerialization": {
+          "type": "Json",
+          "properties": {
+            "encoding": "UTF8"
+          }
+        }
+      },
+      "inputNodes": [
+        {
+          "name": "CommsFilter"
+        }
+      ]
+    }
+  ],
+  "streams": [
+    {
+      "name": "AetherStream-stream",
+      "type": "DefaultStream",
+      "properties": {},
+      "inputNodes": [
+        {
+          "name": "AetherStream"
+        }
+      ]
+    }
+  ],
+  "operators": [
+    {
+      "name": "SecurityFilter",
+      "type": "Filter",
+      "inputNodes": [
+        {
+          "name": "AetherStream-stream"
+        }
+      ],
+      "properties": {
+        "conditions": [
+          {
+            "column": {
+              "node": null,
+              "columnName": "event_type",
+              "columnPath": null,
+              "expressionType": "ColumnReference"
+            },
+            "operatorType": "Equals",
+            "value": {
+              "dataType": "Nvarchar(max)",
+              "value": "SecurityLogs",
+              "expressionType": "Literal"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CommsFilter",
+      "type": "Filter",
+      "inputNodes": [
+        {
+          "name": "AetherStream-stream"
+        }
+      ],
+      "properties": {
+        "conditions": [
+          {
+            "column": {
+              "node": null,
+              "columnName": "event_type",
+              "columnPath": null,
+              "expressionType": "ColumnReference"
+            },
+            "operatorType": "Equals",
+            "value": {
+              "dataType": "Nvarchar(max)",
+              "value": "Communications",
+              "expressionType": "Literal"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "compatibilityLevel": "1.1"
+}
