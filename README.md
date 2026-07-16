@@ -67,11 +67,28 @@ Once the script completes:
 
 1. **Event Simulator** — The Event Hub connection string is injected automatically from the `AetherES` Eventstream during deployment, so no manual configuration is needed. Just open the notebook in Fabric and run it to start streaming events. (To point it at a different Event Hub for a manual run, set the `AETHER_EVENTHUB_CONNECTION_STRING` environment variable, which overrides the injected value.)
 
-2. **Audience Voting (Real-Time via Logic App)** — The live voting pipeline uses a Microsoft Form → Azure Logic App → Eventstream → Eventhouse `Votes` table → `Audience Votes` dashboard. This pattern is credited to [liamhowlett/fabric-rti-livesurvey](https://github.com/liamhowlett/fabric-rti-livesurvey). To finish wiring it up:
-   1. Create a Microsoft Form with a "Who did it?" choice question (Evelyn Reed, Marcus Thorne, Anya Sharma, Dr. Alistair Finch). Optionally add a "Your name" question.
-   2. In the Azure portal, open the `aether-forms` API connection and click **Authorize** (one-time Microsoft Forms OAuth consent).
-   3. Open the `aether-votes-logicapp` Logic App in the designer. Confirm the form is selected in the trigger, bind the **Suspect** answer (and optionally **Name**) in the "Send vote to Eventstream" action, then **Save**. (You can also pass `-VotesFormId` / `-VotesSuspectQuestionId` / `-VotesNameQuestionId` to `deploy.ps1` to skip this binding.)
-   4. Submit a test response and verify it lands in the Eventhouse `Votes` table and appears on the "Audience Votes" dashboard.
+2. **Audience Voting (Real-Time via Logic App)** — The live voting pipeline uses a Microsoft Form → Azure Logic App → Eventstream → Eventhouse `Votes` table → `Audience Votes` dashboard. This pattern is credited to [liamhowlett/fabric-rti-livesurvey](https://github.com/liamhowlett/fabric-rti-livesurvey).
+
+   The Logic App (`aether-votes-logicapp`) is deployed fully wired **except** for three form-specific values it reads as workflow parameters. You supply these once — either through the portal (below) or by re-running `deploy.ps1` with the matching switches.
+
+   | Parameter | What it is | `deploy.ps1` switch |
+   |-----------|------------|---------------------|
+   | `formId` | The long id of **your** Microsoft Form (not the `/r/…` short link). | `-VotesFormId` |
+   | `suspectQuestionId` | The Forms question id (e.g. `r8a1c…`) that holds the "Who did it?" answer. | `-VotesSuspectQuestionId` |
+   | `nameQuestionId` | *Optional.* The question id for the voter's name. Falls back to the responder's email if blank. | `-VotesNameQuestionId` |
+
+   Forms' *Get response details* returns answers keyed by **question id**, not friendly names, and you can't know those ids until one response exists — so the reliable order is: set the form id → authorize → submit one test → read the ids from the run → paste them in.
+
+   1. **Create the form.** A "Who did it?" choice question (Evelyn Reed, Marcus Thorne, Anya Sharma, Dr. Alistair Finch). Optionally add a "Your name" question.
+   2. **Get the form id.** Open the form in the Forms editor; in the browser URL, copy the value between `id=` and the next `&`. That's `formId`.
+   3. **Authorize the connection.** Azure portal → resource group (`rg-fabricmystery`) → API connection **`aether-forms`** → **Edit API connection** → **Authorize** → sign in → **Save**. (One-time Microsoft Forms OAuth consent.)
+   4. **Set the form id.** Open the **`aether-votes-logicapp`** Logic App → **Logic app designer** → **Parameters** → set **`formId`** → **Save**. The trigger only registers its webhook once `formId` is set.
+   5. **Submit one test response** to the form.
+   6. **Read the question ids.** Logic App → **Run history** → open the latest run → expand **Get response details** → **Outputs** → `body`. You'll see pairs like `"r8a1c…": "Dr. Alistair Finch"`. The key whose value is the chosen **suspect** is `suspectQuestionId`; the key whose value is the **name** is `nameQuestionId`.
+   7. **Set the ids.** Back in **Parameters**, paste them into **`suspectQuestionId`** (and optionally **`nameQuestionId`**) → **Save**.
+   8. **Verify.** Submit another response and confirm it lands in the Eventhouse `Votes` table and appears on the "Audience Votes" dashboard.
+
+   > Shortcut: once you know all three ids, you can instead re-run `deploy.ps1 -VotesFormId <id> -VotesSuspectQuestionId <id> -VotesNameQuestionId <id>` and skip the portal editing entirely.
 
 3. **Open the App** — Navigate to the workspace in the Fabric portal and launch "Aether App" for the player experience.
 
