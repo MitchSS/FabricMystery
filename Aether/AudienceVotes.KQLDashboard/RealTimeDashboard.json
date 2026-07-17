@@ -51,6 +51,23 @@
         "queryId": "c304b5bc-88de-470d-ad81-089b3ceb73de"
       },
       "visualOptions": {}
+    },
+    {
+      "id": "0929dcf2-f8d2-4e87-8e7a-fa2af7b01ef8",
+      "title": "Votes by Suspect across Vote Sections",
+      "layout": {
+        "x": 0,
+        "y": 19,
+        "width": 24,
+        "height": 7
+      },
+      "pageId": "8daf9d99-653a-475f-bcde-9cc57f517629",
+      "visualType": "bar",
+      "queryRef": {
+        "kind": "query",
+        "queryId": "a964909b-7992-4d46-ba6e-de0694561ed4"
+      },
+      "visualOptions": {}
     }
   ],
   "baseQueries": [],
@@ -96,6 +113,15 @@
       },
       "text": "Votes\n| project Timestamp, VoterName, Suspect\n| order by Timestamp desc\n| take 25",
       "id": "c304b5bc-88de-470d-ad81-089b3ceb73de",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      },
+      "text": "Votes\n| summarize VoteCount = count() by Suspect, VoteSection\n| order by Suspect asc, VoteSection asc",
+      "id": "a964909b-7992-4d46-ba6e-de0694561ed4",
       "usedVariables": []
     }
   ],
