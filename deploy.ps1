@@ -9,6 +9,7 @@
     Idempotent: safe to re-run against a workspace that was already deployed. Existing items
     are updated in place (via updateDefinition) rather than duplicated, and existing OneLake
     shortcuts are skipped. The KQL schema uses .create-merge/.alter-merge (also idempotent).
+    The four utility notebooks are grouped into an "Admin" workspace folder to mirror the repo.
 
 .PARAMETER WorkspaceName
     Target Fabric workspace name. Created if it does not exist.
@@ -194,6 +195,24 @@ function Get-ItemByName {
     return $items.value | Where-Object { $_.displayName -eq $DisplayName } | Select-Object -First 1
 }
 
+function Resolve-Folder {
+    # Returns the id of a workspace folder with the given name, creating it if absent.
+    # Fabric workspace folders are optional organizational containers; deploy.ps1 uses
+    # one ("Admin") to group the utility notebooks, mirroring the repo's Admin\ folder.
+    param(
+        [string]$WorkspaceId,
+        [string]$FolderName
+    )
+
+    $folders = Invoke-FabricApi -Method "GET" -Url "$FabricApi/workspaces/$WorkspaceId/folders"
+    $existing = $folders.value | Where-Object { $_.displayName -eq $FolderName } | Select-Object -First 1
+    if ($existing) { return $existing.id }
+
+    $created = Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WorkspaceId/folders" -Body @{ displayName = $FolderName }
+    Write-Host "  Created folder: $FolderName -> $($created.id)"
+    return $created.id
+}
+
 function Wait-ForItemByName {
     param(
         [string]$WorkspaceId,
@@ -245,7 +264,10 @@ function Deploy-Item {
         # When set, an already-existing item is reused as-is and its definition is NOT
         # rewritten. Used for the Eventstream, whose CustomEndpoint connection string can
         # rotate on a definition update and would break the live Votes Logic App binding.
-        [switch]$CreateOnly
+        [switch]$CreateOnly,
+        # Optional workspace folder id. On create the item is placed in the folder; on
+        # re-run an existing item is moved into it if it's not already there.
+        [string]$FolderId
     )
 
     # Idempotency: if an item with this name + type already exists, update it in place
@@ -256,9 +278,8 @@ function Deploy-Item {
     if ($existing) {
         if ($CreateOnly) {
             Write-Host "  Exists:  $DisplayName ($Type) -> $($existing.id) (create-only; definition left unchanged)"
-            return $existing
         }
-        if ($Parts) {
+        elseif ($Parts) {
             $definition = @{ parts = $Parts }
             if ($Format) { $definition.format = $Format }
             Invoke-FabricApi -Method "POST" `
@@ -270,6 +291,13 @@ function Deploy-Item {
             # Definition-less items (Eventhouse, Lakehouse) have nothing to update; reuse as-is.
             Write-Host "  Exists:  $DisplayName ($Type) -> $($existing.id)"
         }
+        # Ensure the item is in the requested folder (move if it drifted or is new to it).
+        if ($FolderId -and $existing.folderId -ne $FolderId) {
+            Invoke-FabricApi -Method "POST" `
+                -Url "$FabricApi/workspaces/$WorkspaceId/items/$($existing.id)/move" `
+                -Body @{ targetFolderId = $FolderId } | Out-Null
+            Write-Host "  Moved:   $DisplayName -> folder $FolderId"
+        }
         return $existing
     }
 
@@ -277,6 +305,7 @@ function Deploy-Item {
         displayName = $DisplayName
         type        = $Type
     }
+    if ($FolderId) { $body.folderId = $FolderId }
 
     # Some item types (e.g. Eventhouse, Lakehouse) are created without a definition
     # envelope; the service provisions their child items automatically. Others (e.g.
@@ -366,6 +395,10 @@ if ($workspace) {
     $WS_ID = $workspace.id
     Write-Host "  Created workspace: $WS_ID"
 }
+
+# Resolve (create if needed) the Admin folder that groups the utility notebooks,
+# mirroring the repo's Admin\ layout. Items are placed here as they deploy.
+$ADMIN_FOLDER_ID = Resolve-Folder -WorkspaceId $WS_ID -FolderName "Admin"
 
 # --- Step 2: Create Eventhouse ---
 Write-Host "[2/16] Creating Eventhouse + KQL Database"
@@ -473,7 +506,7 @@ $popNbPath = Join-Path $ScriptRoot "Admin\Populate Lakehouse.Notebook\notebook.i
 # Attach AetherLH as the notebook's default lakehouse so %%sql / saveAsTable resolve.
 $popNbContent = Set-NotebookLakehouse -NotebookPath $popNbPath -LakehouseId $LH_ID -LakehouseName "AetherLH" -WorkspaceId $WS_ID
 
-$popNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Populate Lakehouse" -Type "Notebook" -Format "ipynb" -Parts @(
+$popNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Populate Lakehouse" -Type "Notebook" -Format "ipynb" -FolderId $ADMIN_FOLDER_ID -Parts @(
     @{ path = "notebook.ipynb"; payload = (Get-Base64String $popNbContent); payloadType = "InlineBase64" }
 )
 
@@ -537,7 +570,7 @@ $rebindPath = Join-Path $ScriptRoot "Admin\Rebind Semantic Model.Notebook\notebo
 $rebindContent = Get-Content $rebindPath -Raw
 $rebindContent = Replace-Placeholders -Content $rebindContent -Tokens $tokens
 
-$rebindNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Rebind Semantic Model" -Type "Notebook" -Format "ipynb" -Parts @(
+$rebindNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Rebind Semantic Model" -Type "Notebook" -Format "ipynb" -FolderId $ADMIN_FOLDER_ID -Parts @(
     @{ path = "notebook.ipynb"; payload = (Get-Base64String $rebindContent); payloadType = "InlineBase64" }
 )
 
@@ -695,7 +728,7 @@ if ($EVENTHUB_CONN) {
     $simContent = $simContent.Replace("{{EVENTHUB_CONNECTION_STRING}}", $EVENTHUB_CONN)
 }
 
-$simNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Event Simulator" -Type "Notebook" -Format "ipynb" -Parts @(
+$simNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Event Simulator" -Type "Notebook" -Format "ipynb" -FolderId $ADMIN_FOLDER_ID -Parts @(
     @{ path = "notebook.ipynb"; payload = (Get-Base64String $simContent); payloadType = "InlineBase64" }
 )
 
@@ -706,7 +739,7 @@ Write-Host "[15/16] Deploying Housekeeping Notebook"
 
 $hkPath = Join-Path $ScriptRoot "Admin\Housekeeping.Notebook\notebook.ipynb"
 
-$hkNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Housekeeping" -Type "Notebook" -Format "ipynb" -Parts @(
+$hkNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Housekeeping" -Type "Notebook" -Format "ipynb" -FolderId $ADMIN_FOLDER_ID -Parts @(
     @{ path = "notebook.ipynb"; payload = (Get-Base64String (Get-Content $hkPath -Raw)); payloadType = "InlineBase64" }
 )
 

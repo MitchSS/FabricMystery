@@ -122,6 +122,8 @@ The **Populate Lakehouse** notebook (step 6) writes these as `raw.githubusercont
 
 The script is **idempotent** — you can re-run it against an existing workspace to push local changes. Items that already exist are updated in place (via `updateDefinition`) rather than duplicated, existing OneLake shortcuts are skipped, and the KQL schema uses `.create-merge`/`.alter-merge`. Re-running also re-runs the Populate Lakehouse and Rebind notebooks.
 
+The four utility notebooks (Populate Lakehouse, Rebind Semantic Model, Event Simulator, Housekeeping) are grouped into an **Admin** folder in the workspace — mirroring the repo's `Admin\` layout — so the "show" items (reports, dashboards, semantic model, Eventhouse, etc.) stay uncluttered at the root. The folder is created automatically and notebooks are moved into it on every run. The Eventstream (`AetherES`) is treated as **create-only** on re-run: its definition is left untouched so its Event Hub connection string can't rotate and break the live Audience Votes Logic App binding.
+
 ```powershell
 # Re-run to update an already-deployed workspace with local changes:
 .\deploy.ps1 -WorkspaceName "Fabric Mystery Demo"
