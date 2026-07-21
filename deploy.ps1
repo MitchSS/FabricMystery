@@ -241,7 +241,11 @@ function Deploy-Item {
         [string]$DisplayName,
         [string]$Type,
         [string]$Format,
-        [array]$Parts
+        [array]$Parts,
+        # When set, an already-existing item is reused as-is and its definition is NOT
+        # rewritten. Used for the Eventstream, whose CustomEndpoint connection string can
+        # rotate on a definition update and would break the live Votes Logic App binding.
+        [switch]$CreateOnly
     )
 
     # Idempotency: if an item with this name + type already exists, update it in place
@@ -250,6 +254,10 @@ function Deploy-Item {
     $existing = Get-ItemByName -WorkspaceId $WorkspaceId -DisplayName $DisplayName -Type $Type
 
     if ($existing) {
+        if ($CreateOnly) {
+            Write-Host "  Exists:  $DisplayName ($Type) -> $($existing.id) (create-only; definition left unchanged)"
+            return $existing
+        }
         if ($Parts) {
             $definition = @{ parts = $Parts }
             if ($Format) { $definition.format = $Format }
@@ -639,7 +647,7 @@ $esContent = Get-Content $esJsonPath -Raw
 $esContent = Replace-Placeholders -Content $esContent -Tokens $tokens
 $esPlatformContent = Get-Content $esPlatformPath -Raw
 
-$esItem = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherES" -Type "Eventstream" -Parts @(
+$esItem = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherES" -Type "Eventstream" -CreateOnly -Parts @(
     @{ path = "eventstream.json"; payload = (Get-Base64String $esContent); payloadType = "InlineBase64" }
     @{ path = ".platform"; payload = (Get-Base64String $esPlatformContent); payloadType = "InlineBase64" }
 )
