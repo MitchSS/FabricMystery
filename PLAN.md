@@ -129,18 +129,21 @@ FabricMystery/
 │   │           └── lakehouse-tables-AetherLH/
 │   │               ├── datasource.json
 │   │               └── fewshots.json
-│   ├── Populate Lakehouse.Notebook/
-│   │   └── notebook.ipynb
-│   ├── Event Simulator.Notebook/
-│   │   └── notebook.ipynb
 │   ├── AetherES.Eventstream/
 │   │   ├── .platform
 │   │   └── eventstream.json
-│   ├── Rebind Semantic Model.Notebook/
-│   │   └── notebook.ipynb
 │   └── Aether App.OrgApp/
 │       ├── .platform
 │       └── definition.json
+├── Admin/                              # operational / utility notebooks
+│   ├── Populate Lakehouse.Notebook/
+│   │   └── notebook.ipynb
+│   ├── Rebind Semantic Model.Notebook/
+│   │   └── notebook.ipynb
+│   ├── Event Simulator.Notebook/
+│   │   └── notebook.ipynb
+│   └── Housekeeping.Notebook/
+│       └── notebook.ipynb
 └── Logs.KQLDashboard/
     ├── .platform
     └── RealTimeDashboard.json

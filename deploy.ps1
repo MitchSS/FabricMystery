@@ -420,7 +420,7 @@ foreach ($sc in $shortcuts.shortcuts) {
 # --- Step 6: Deploy + Run Populate Notebook ---
 Write-Host "[6/16] Deploying Populate Lakehouse Notebook"
 
-$popNbPath = Join-Path $ScriptRoot "Aether\Populate Lakehouse.Notebook\notebook.ipynb"
+$popNbPath = Join-Path $ScriptRoot "Admin\Populate Lakehouse.Notebook\notebook.ipynb"
 # Attach AetherLH as the notebook's default lakehouse so %%sql / saveAsTable resolve.
 $popNbContent = Set-NotebookLakehouse -NotebookPath $popNbPath -LakehouseId $LH_ID -LakehouseName "AetherLH" -WorkspaceId $WS_ID
 
@@ -484,7 +484,7 @@ $SM_ID = $smResult.id
 # --- Step 8: Deploy + Run Rebind Notebook ---
 Write-Host "[8/16] Deploying Rebind Semantic Model Notebook"
 
-$rebindPath = Join-Path $ScriptRoot "Aether\Rebind Semantic Model.Notebook\notebook.ipynb"
+$rebindPath = Join-Path $ScriptRoot "Admin\Rebind Semantic Model.Notebook\notebook.ipynb"
 $rebindContent = Get-Content $rebindPath -Raw
 $rebindContent = Replace-Placeholders -Content $rebindContent -Tokens $tokens
 
@@ -638,7 +638,7 @@ else {
 # --- Step 14: Deploy Event Simulator Notebook ---
 Write-Host "[14/16] Deploying Event Simulator Notebook"
 
-$simPath = Join-Path $ScriptRoot "Aether\Event Simulator.Notebook\notebook.ipynb"
+$simPath = Join-Path $ScriptRoot "Admin\Event Simulator.Notebook\notebook.ipynb"
 $simContent = Get-Content $simPath -Raw
 $simContent = $simContent -replace '"id": ""', "`"id`": `"$LH_ID`""
 if ($EVENTHUB_CONN) {
@@ -655,7 +655,7 @@ Write-Host "  NOTE: Event Simulator is NOT auto-run. Start it manually when read
 # --- Step 15: Deploy Housekeeping / Reset Notebook ---
 Write-Host "[15/16] Deploying Housekeeping Notebook"
 
-$hkPath = Join-Path $ScriptRoot "Aether\Housekeeping.Notebook\notebook.ipynb"
+$hkPath = Join-Path $ScriptRoot "Admin\Housekeeping.Notebook\notebook.ipynb"
 
 $hkNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Housekeeping" -Type "Notebook" -Format "ipynb" -Parts @(
     @{ path = "notebook.ipynb"; payload = (Get-Base64String (Get-Content $hkPath -Raw)); payloadType = "InlineBase64" }
