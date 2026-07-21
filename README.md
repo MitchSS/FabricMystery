@@ -116,12 +116,20 @@ The **Populate Lakehouse** notebook (step 6) writes these as `raw.githubusercont
 
 ## Redeployment & Cleanup
 
-The script does **not** support incremental updates — it expects a fresh workspace. To redeploy:
+The script is **idempotent** — you can re-run it against an existing workspace to push local changes. Items that already exist are updated in place (via `updateDefinition`) rather than duplicated, existing OneLake shortcuts are skipped, and the KQL schema uses `.create-merge`/`.alter-merge`. Re-running also re-runs the Populate Lakehouse and Rebind notebooks.
 
 ```powershell
-# Delete the workspace in the Fabric portal (or via API), then re-run:
+# Re-run to update an already-deployed workspace with local changes:
+.\deploy.ps1 -WorkspaceName "Fabric Mystery Demo"
+```
+
+For a completely clean slate, delete the workspace in the Fabric portal (or via API) first, then run with `-CapacityId`:
+
+```powershell
 .\deploy.ps1 -WorkspaceName "Fabric Mystery Demo" -CapacityId "<your-capacity-guid>"
 ```
+
+> Note: re-running rewrites the `AetherES` Eventstream definition. If you've already wired the Audience Votes Logic App to the Eventstream's Event Hub endpoint, verify the connection still works after a redeploy (the endpoint's connection string can rotate).
 
 ## Troubleshooting
 

@@ -6,6 +6,10 @@
     Orchestrates creation of all Fabric items in dependency order using the Fabric REST API.
     Reads local definition files, injects dynamic IDs, base64-encodes payloads, and deploys.
 
+    Idempotent: safe to re-run against a workspace that was already deployed. Existing items
+    are updated in place (via updateDefinition) rather than duplicated, and existing OneLake
+    shortcuts are skipped. The KQL schema uses .create-merge/.alter-merge (also idempotent).
+
 .PARAMETER WorkspaceName
     Target Fabric workspace name. Created if it does not exist.
 
@@ -179,6 +183,17 @@ function Wait-ForJob {
     throw "Job $JobInstanceId timed out after $TimeoutSeconds seconds"
 }
 
+function Get-ItemByName {
+    param(
+        [string]$WorkspaceId,
+        [string]$DisplayName,
+        [string]$Type
+    )
+
+    $items = Invoke-FabricApi -Method "GET" -Url "$FabricApi/workspaces/$WorkspaceId/items?type=$Type"
+    return $items.value | Where-Object { $_.displayName -eq $DisplayName } | Select-Object -First 1
+}
+
 function Wait-ForItemByName {
     param(
         [string]$WorkspaceId,
@@ -228,6 +243,27 @@ function Deploy-Item {
         [string]$Format,
         [array]$Parts
     )
+
+    # Idempotency: if an item with this name + type already exists, update it in place
+    # (via updateDefinition) instead of creating a duplicate. This lets deploy.ps1 be
+    # safely re-run against a workspace that was already deployed.
+    $existing = Get-ItemByName -WorkspaceId $WorkspaceId -DisplayName $DisplayName -Type $Type
+
+    if ($existing) {
+        if ($Parts) {
+            $definition = @{ parts = $Parts }
+            if ($Format) { $definition.format = $Format }
+            Invoke-FabricApi -Method "POST" `
+                -Url "$FabricApi/workspaces/$WorkspaceId/items/$($existing.id)/updateDefinition" `
+                -Body @{ definition = $definition } | Out-Null
+            Write-Host "  Updated: $DisplayName ($Type) -> $($existing.id)"
+        }
+        else {
+            # Definition-less items (Eventhouse, Lakehouse) have nothing to update; reuse as-is.
+            Write-Host "  Exists:  $DisplayName ($Type) -> $($existing.id)"
+        }
+        return $existing
+    }
 
     $body = @{
         displayName = $DisplayName
@@ -404,11 +440,16 @@ foreach ($sc in $shortcuts.shortcuts) {
     $attempt = 0
     while ($true) {
         try {
-            Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WS_ID/items/$LH_ID/shortcuts" -Body $scBody
+            Invoke-FabricApi -Method "POST" -Url "$FabricApi/workspaces/$WS_ID/items/$LH_ID/shortcuts?shortcutConflictPolicy=Abort" -Body $scBody
             Write-Host "  Shortcut: $($sc.name)"
             break
         }
         catch {
+            # Idempotency: a shortcut that already exists (re-run) is a success, not a failure.
+            if ("$_" -match 'already exists|Conflict|409|ShortcutAlreadyExists|DuplicateName') {
+                Write-Host "  Shortcut exists: $($sc.name)"
+                break
+            }
             $attempt++
             if ($attempt -ge 6) { throw }
             Write-Host "  Shortcut $($sc.name) not ready (attempt $attempt); retrying in 20s..."
