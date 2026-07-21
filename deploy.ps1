@@ -307,7 +307,7 @@ Write-Host "============================================================"
 Write-Host ""
 
 # --- Step 1: Resolve or Create Workspace ---
-Write-Host "[1/15] Resolving workspace: $WorkspaceName"
+Write-Host "[1/16] Resolving workspace: $WorkspaceName"
 
 $workspaces = Invoke-FabricApi -Method "GET" -Url "$FabricApi/workspaces?`$filter=displayName eq '$WorkspaceName'"
 $workspace = $workspaces.value | Where-Object { $_.displayName -eq $WorkspaceName } | Select-Object -First 1
@@ -324,7 +324,7 @@ if ($workspace) {
 }
 
 # --- Step 2: Create Eventhouse ---
-Write-Host "[2/15] Creating Eventhouse + KQL Database"
+Write-Host "[2/16] Creating Eventhouse + KQL Database"
 
 $ehResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherEH" -Type "Eventhouse"
 $EH_ID = $ehResult.id
@@ -342,14 +342,14 @@ $CLUSTER_URI = $kqlDbDetail.properties.queryServiceUri
 Write-Host "  Cluster URI: $CLUSTER_URI"
 
 # --- Step 3: Create Lakehouse ---
-Write-Host "[3/15] Creating Lakehouse"
+Write-Host "[3/16] Creating Lakehouse"
 
 $lhResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherLH" -Type "Lakehouse"
 $LH_ID = $lhResult.id
 Write-Host "  Lakehouse ID: $LH_ID"
 
 # --- Step 4: Deploy KQL Schema ---
-Write-Host "[4/15] Deploying KQL Schema"
+Write-Host "[4/16] Deploying KQL Schema"
 
 $schemaPath = Join-Path $ScriptRoot "Aether\AetherEH.Eventhouse\.children\AetherEH.KQLDatabase\DatabaseSchema.kql"
 $schemaContent = Get-Content $schemaPath -Raw
@@ -373,7 +373,7 @@ foreach ($t in $availTables) {
 }
 
 # --- Step 5: Create Shortcuts ---
-Write-Host "[5/15] Creating Shortcuts (Eventhouse -> Lakehouse)"
+Write-Host "[5/16] Creating Shortcuts (Eventhouse -> Lakehouse)"
 
 $tokens = @{
     "WORKSPACE_ID"          = $WS_ID
@@ -418,7 +418,7 @@ foreach ($sc in $shortcuts.shortcuts) {
 }
 
 # --- Step 6: Deploy + Run Populate Notebook ---
-Write-Host "[6/15] Deploying Populate Lakehouse Notebook"
+Write-Host "[6/16] Deploying Populate Lakehouse Notebook"
 
 $popNbPath = Join-Path $ScriptRoot "Aether\Populate Lakehouse.Notebook\notebook.ipynb"
 # Attach AetherLH as the notebook's default lakehouse so %%sql / saveAsTable resolve.
@@ -433,7 +433,7 @@ $jobId = Start-ItemJob -WorkspaceId $WS_ID -ItemId $popNb.id -JobType "RunNotebo
 Wait-ForJob -WorkspaceId $WS_ID -ItemId $popNb.id -JobInstanceId $jobId
 
 # --- Step 7: Deploy Semantic Model ---
-Write-Host "[7/15] Deploying Semantic Model"
+Write-Host "[7/16] Deploying Semantic Model"
 
 # Resolve the Lakehouse SQL analytics endpoint and inject it into the Direct Lake
 # model connection so it binds to this workspace's lakehouse at deploy time.
@@ -482,7 +482,7 @@ $smResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherSM" -Type "Seman
 $SM_ID = $smResult.id
 
 # --- Step 8: Deploy + Run Rebind Notebook ---
-Write-Host "[8/15] Deploying Rebind Semantic Model Notebook"
+Write-Host "[8/16] Deploying Rebind Semantic Model Notebook"
 
 $rebindPath = Join-Path $ScriptRoot "Aether\Rebind Semantic Model.Notebook\notebook.ipynb"
 $rebindContent = Get-Content $rebindPath -Raw
@@ -505,7 +505,7 @@ catch {
 }
 
 # --- Step 9: Deploy Reports ---
-Write-Host "[9/15] Deploying Reports"
+Write-Host "[9/16] Deploying Reports"
 
 $invReportResult = Deploy-Report -WorkspaceId $WS_ID `
     -ReportFolder (Join-Path $ScriptRoot "Aether Investigation.Report") `
@@ -524,7 +524,7 @@ $LOGS_REPORT_ID = $logsReportResult.id
 $REPORT_LOGICAL_ID = $INV_REPORT_ID
 
 # --- Step 10: Deploy KQL Dashboard ---
-Write-Host "[10/15] Deploying KQL Dashboard"
+Write-Host "[10/16] Deploying KQL Dashboard"
 
 $dashPath = Join-Path $ScriptRoot "Aether\Logs.KQLDashboard\RealTimeDashboard.json"
 $dashContent = Get-Content $dashPath -Raw
@@ -543,7 +543,7 @@ $audDashResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Audience Votes" -
 )
 
 # --- Step 11: Deploy Data Agent ---
-Write-Host "[11/15] Deploying Data Agent"
+Write-Host "[11/16] Deploying Data Agent"
 
 $daConfigDir = Join-Path $ScriptRoot "Aether\AetherDA.DataAgent\Files\Config"
 $daParts = @()
@@ -573,7 +573,7 @@ $daResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "AetherDA" -Type "DataA
 $DA_ID = $daResult.id
 
 # --- Step 12: Deploy Org App ---
-Write-Host "[12/15] Deploying Org App"
+Write-Host "[12/16] Deploying Org App"
 
 # Item elements bind by itemId + folderObjectId (the workspace id is the root folder).
 # NOTE: Org Apps do not currently accept Data Agents as item elements (the service
@@ -590,7 +590,7 @@ $orgAppResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Aether App" -Type 
 )
 
 # --- Step 13: Deploy Eventstream (auto-provisions the Event Hub connection) ---
-Write-Host "[13/15] Deploying Eventstream (AetherES)"
+Write-Host "[13/16] Deploying Eventstream (AetherES)"
 
 $esJsonPath = Join-Path $ScriptRoot "Aether\AetherES.Eventstream\eventstream.json"
 $esPlatformPath = Join-Path $ScriptRoot "Aether\AetherES.Eventstream\.platform"
@@ -636,7 +636,7 @@ else {
 }
 
 # --- Step 14: Deploy Event Simulator Notebook ---
-Write-Host "[14/15] Deploying Event Simulator Notebook"
+Write-Host "[14/16] Deploying Event Simulator Notebook"
 
 $simPath = Join-Path $ScriptRoot "Aether\Event Simulator.Notebook\notebook.ipynb"
 $simContent = Get-Content $simPath -Raw
@@ -652,8 +652,19 @@ $simNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Event Simulator" -Type "N
 
 Write-Host "  NOTE: Event Simulator is NOT auto-run. Start it manually when ready for the demo."
 
-# --- Step 15: Deploy Audience Votes Logic App (MS Form -> Eventstream -> Votes table) ---
-Write-Host "[15/15] Deploying Audience Votes Logic App"
+# --- Step 15: Deploy Housekeeping / Reset Notebook ---
+Write-Host "[15/16] Deploying Housekeeping Notebook"
+
+$hkPath = Join-Path $ScriptRoot "Aether\Housekeeping.Notebook\notebook.ipynb"
+
+$hkNb = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Housekeeping" -Type "Notebook" -Format "ipynb" -Parts @(
+    @{ path = "notebook.ipynb"; payload = (Get-Base64String (Get-Content $hkPath -Raw)); payloadType = "InlineBase64" }
+)
+
+Write-Host "  NOTE: Housekeeping is NOT auto-run. Run it before each show to clear the Votes table (auto-resolves the cluster URI)."
+
+# --- Step 16: Deploy Audience Votes Logic App (MS Form -> Eventstream -> Votes table) ---
+Write-Host "[16/16] Deploying Audience Votes Logic App"
 
 # Pattern credited to https://github.com/liamhowlett/fabric-rti-livesurvey
 # The Logic App fires on each new Microsoft Forms response, reads the answer, and

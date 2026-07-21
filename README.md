@@ -42,7 +42,7 @@ cd FabricMystery
 | `-VotesVoteSectionQuestionId` | No | `""` | Forms question id for the Vote Section / voting round (e.g. "Final Vote"). |
 | `-VotesNameQuestionId` | No | `""` | Forms question id for the voter Name. Falls back to responder email if blank. |
 
-### What the Script Does (15 Steps)
+### What the Script Does (16 Steps)
 
 | Step | Action |
 |------|--------|
@@ -60,7 +60,8 @@ cd FabricMystery
 | 12 | Deploy Org App (`Aether App`) |
 | 13 | Deploy Eventstream (`AetherES`) + auto-fetch Event Hub connection string |
 | 14 | Deploy Event Simulator notebook (connection string injected automatically) |
-| 15 | Deploy Audience Votes Logic App (MS Form → Eventstream → `Votes` table) |
+| 15 | Deploy Housekeeping notebook (pre-show reset of the `Votes` table) |
+| 16 | Deploy Audience Votes Logic App (MS Form → Eventstream → `Votes` table) |
 
 ### Post-Deployment Setup
 
@@ -93,6 +94,12 @@ Once the script completes:
    > Shortcut: once you know all three ids, you can instead re-run `deploy.ps1 -VotesFormId <id> -VotesSuspectQuestionId <id> -VotesNameQuestionId <id>` and skip the portal editing entirely.
 
 3. **Open the App** — Navigate to the workspace in the Fabric portal and launch "Aether App" for the player experience.
+
+4. **Reset Between Shows (Housekeeping)** — Run the **Housekeeping** notebook before each presentation to clear the previous run's audience votes so the dashboards start clean. It auto-resolves the `AetherEH` cluster URI from the current workspace (zero config), shows row counts before/after, and runs `.clear table Votes data` (deletes rows, keeps schema — the Eventstream keeps writing and tiles keep working).
+
+   - Defaults to clearing the `Votes` table only.
+   - Set `RESET_DEMO_DATA = True` in the config cell to also clear the streamed `SecurityLogs` and `Communications` tables (useful before re-running the Event Simulator). Reference tables (`VictimCalendar`, `SupplierRecords`) are left untouched.
+   - Clear right at showtime: votes still buffered in the Event Hub / Eventstream land *after* the clear, so let in-flight submissions drain (or briefly pause the Eventstream source) first.
 
 ## Character Images
 
@@ -209,7 +216,8 @@ flowchart TD
     K --> L
     B --> ES2[13. Eventstream AetherES]
     ES2 --> M[14. Event Simulator Notebook]
-    ES2 --> N[15. Audience Votes Logic App]
+    B --> HK[15. Housekeeping Notebook]
+    ES2 --> N[16. Audience Votes Logic App]
 
     style F stroke:#107C10,stroke-width:2px
     style H stroke:#107C10,stroke-width:2px
