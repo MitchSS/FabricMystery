@@ -45,6 +45,16 @@ table SecurityLogs
 
 		annotation SummarizationSetBy = Automatic
 
+	column Suspicious
+		dataType: boolean
+		sourceProviderType: bit
+		lineageTag: 3b9f1c42-8a77-4e2d-9c61-2d4e5f6a7b80
+		sourceLineageTag: Suspicious
+		summarizeBy: none
+		sourceColumn: Suspicious
+
+		annotation SummarizationSetBy = Automatic
+
 	partition SecurityLogs = entity
 		mode: directLake
 		source

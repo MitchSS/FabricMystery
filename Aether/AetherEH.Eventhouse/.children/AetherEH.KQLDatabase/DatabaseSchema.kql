@@ -9,7 +9,8 @@
     Timestamp: datetime,
     PersonID: int,
     LocationID: int,
-    EventType: string
+    EventType: string,
+    Suspicious: bool
 )
 
 // --- Communications ---
