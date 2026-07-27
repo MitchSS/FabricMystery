@@ -33,7 +33,35 @@
         "kind": "query",
         "queryId": "0d5ae7f7-8c14-4ccb-90f0-7bcacc14f51e"
       },
-      "visualOptions": {}
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "Event Count",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": null,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": true,
+        "legendLocation": "bottom",
+        "xColumnTitle": "Person",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "drillthrough": []
+      }
     },
     {
       "id": "a2435f2b-a186-4718-b094-8d80be7d964c",
@@ -67,7 +95,16 @@
         "kind": "query",
         "queryId": "ce14a2b0-f228-4ecf-82b6-a9349589ceeb"
       },
-      "visualOptions": {}
+      "visualOptions": {
+        "table__enableRenderLinks": true,
+        "colorRulesDisabled": true,
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "drillthrough": [],
+        "table__renderLinks": [],
+        "colorRules": []
+      }
     },
     {
       "id": "cec76986-3550-44ff-87bb-36f69fb05410",
@@ -192,7 +229,7 @@
         "kind": "inline",
         "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
       },
-      "text": "SecurityLogs\n| where EventType has 'suspicious' or EventType has 'alert'\n| project Timestamp, PersonID, LocationID, EventType\n| order by Timestamp desc\n| take 50",
+      "text": "SecurityLogs\n| project Timestamp, PersonID, LocationID, EventType\n| order by Timestamp desc\n| take 50",
       "id": "ce14a2b0-f228-4ecf-82b6-a9349589ceeb",
       "usedVariables": []
     },
