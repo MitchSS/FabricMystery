@@ -637,11 +637,9 @@ $daFiles = @(
     "data_agent.json",
     "publish_info.json",
     "draft/stage_config.json",
-    "draft/kusto-AetherEH/datasource.json",
     "draft/lakehouse-tables-AetherLH/datasource.json",
     "draft/lakehouse-tables-AetherLH/fewshots.json",
     "published/stage_config.json",
-    "published/kusto-AetherEH/datasource.json",
     "published/lakehouse-tables-AetherLH/datasource.json",
     "published/lakehouse-tables-AetherLH/fewshots.json"
 )
