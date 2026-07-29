@@ -22,7 +22,8 @@
     Recipient: string,
     Subject: string,
     Body: string,
-    Status: string
+    Status: string,
+    Suspicious: bool
 )
 
 // --- VictimCalendar ---

@@ -73,6 +73,16 @@ table Communications
 
 		annotation SummarizationSetBy = Automatic
 
+	column Suspicious
+		dataType: boolean
+		sourceProviderType: bit
+		lineageTag: a1c2d3e4-f5a6-7b8c-9d0e-1f2a3b4c5d6e
+		sourceLineageTag: Suspicious
+		summarizeBy: none
+		sourceColumn: Suspicious
+
+		annotation SummarizationSetBy = Automatic
+
 	partition Communications = entity
 		mode: directLake
 		source
