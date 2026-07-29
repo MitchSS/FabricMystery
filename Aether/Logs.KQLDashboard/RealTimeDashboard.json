@@ -1,29 +1,62 @@
 {
   "schema_version": 77,
+  "changeDetection": {
+    "kind": "liveUpdates",
+    "fallbackRefreshRate": "5m",
+    "minRefreshRate": "30s"
+  },
   "tiles": [
     {
       "id": "6db45f0f-f45e-4444-a553-4fb1c3266f28",
       "title": "Security Events Timeline",
       "layout": {
         "x": 0,
-        "y": 0,
+        "y": 3,
         "width": 12,
         "height": 8
       },
       "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
-      "visualType": "line",
+      "visualType": "scatter",
       "queryRef": {
         "kind": "query",
         "queryId": "61eb2019-2fde-40fa-9793-4e204e611433"
       },
-      "visualOptions": {}
+      "visualOptions": {
+        "multipleYAxes": {
+          "base": {
+            "id": "-1",
+            "label": "",
+            "columns": [],
+            "yAxisMaximumValue": null,
+            "yAxisMinimumValue": 0,
+            "yAxisScale": "linear",
+            "horizontalLines": []
+          },
+          "additional": [],
+          "showMultiplePanels": false
+        },
+        "seriesColors": {},
+        "hideLegend": false,
+        "legendLocation": "right",
+        "xColumnTitle": "",
+        "xColumn": null,
+        "yColumns": null,
+        "seriesColumns": null,
+        "xAxisScale": "linear",
+        "verticalLine": "",
+        "crossFilter": [],
+        "crossFilterDisabled": false,
+        "drillthroughDisabled": false,
+        "forceAxisTicks": false,
+        "drillthrough": []
+      }
     },
     {
       "id": "81e6f9ee-312c-4f89-84ba-94414923bbfa",
       "title": "Events by Person",
       "layout": {
         "x": 12,
-        "y": 4,
+        "y": 7,
         "width": 12,
         "height": 4
       },
@@ -56,10 +89,10 @@
         "seriesColumns": null,
         "xAxisScale": "linear",
         "verticalLine": "",
-        "crossFilter": [],
         "crossFilterDisabled": false,
         "drillthroughDisabled": false,
         "forceAxisTicks": false,
+        "crossFilter": [],
         "drillthrough": []
       }
     },
@@ -68,7 +101,7 @@
       "title": "Events by Location",
       "layout": {
         "x": 12,
-        "y": 0,
+        "y": 3,
         "width": 12,
         "height": 4
       },
@@ -85,7 +118,7 @@
       "title": "Suspicious Events",
       "layout": {
         "x": 0,
-        "y": 8,
+        "y": 11,
         "width": 24,
         "height": 8
       },
@@ -98,9 +131,9 @@
       "visualOptions": {
         "table__enableRenderLinks": true,
         "colorRulesDisabled": true,
-        "crossFilter": [],
         "crossFilterDisabled": false,
         "drillthroughDisabled": false,
+        "crossFilter": [],
         "drillthrough": [],
         "table__renderLinks": [],
         "colorRules": []
@@ -173,6 +206,53 @@
         "queryId": "7a106b07-54c0-4b67-bdc7-c051c095fe95"
       },
       "visualOptions": {}
+    },
+    {
+      "id": "6dd4a3d7-d0ef-4f9e-bf38-5cf096dd7c78",
+      "title": "Total Events",
+      "description": "Total events captured during period.",
+      "visualType": "card",
+      "pageId": "6a90bead-cf22-49df-95a1-f7c100f92894",
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 24,
+        "height": 3
+      },
+      "queryRef": {
+        "kind": "query",
+        "queryId": "24acef09-0fb9-476e-91e3-13be01510d3e"
+      },
+      "visualOptions": {
+        "multiStat__textSize": "auto",
+        "multiStat__valueColumn": null,
+        "colorRulesDisabled": true,
+        "colorRules": [
+          {
+            "id": "dfb9a3c9-1ad1-4310-88da-78889f8bd926",
+            "ruleType": "colorByCondition",
+            "applyToColumn": null,
+            "hideText": false,
+            "applyTo": "cells",
+            "conditions": [
+              {
+                "column": null,
+                "operator": ">",
+                "values": [
+                  ""
+                ]
+              }
+            ],
+            "chainingOperator": "and",
+            "colorStyle": "bold",
+            "color": null,
+            "tag": "",
+            "icon": null,
+            "ruleName": "",
+            "visualType": "card"
+          }
+        ]
+      }
     }
   ],
   "baseQueries": [],
@@ -267,6 +347,15 @@
       },
       "text": "Communications\n| project Timestamp, Sender, Recipient, CommsType, Subject, Status\n| order by Timestamp desc\n| take 50",
       "id": "7a106b07-54c0-4b67-bdc7-c051c095fe95",
+      "usedVariables": []
+    },
+    {
+      "dataSource": {
+        "kind": "inline",
+        "dataSourceId": "57a3d956-526b-4774-8f3d-1e58597da6be"
+      },
+      "text": "SecurityLogs\r\n| summarize TotalEvents = count() ",
+      "id": "24acef09-0fb9-476e-91e3-13be01510d3e",
       "usedVariables": []
     }
   ],

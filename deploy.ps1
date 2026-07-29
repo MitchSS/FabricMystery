@@ -615,6 +615,7 @@ $dashContent = Replace-Placeholders -Content $dashContent -Tokens $tokens
 $dashResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Logs" -Type "KQLDashboard" -Parts @(
     @{ path = "RealTimeDashboard.json"; payload = (Get-Base64String $dashContent); payloadType = "InlineBase64" }
 )
+$LOGS_KQL_DASHBOARD_ID = $dashResult.id
 
 $audDashPath = Join-Path $ScriptRoot "Aether\AudienceVotes.KQLDashboard\RealTimeDashboard.json"
 $audDashContent = Get-Content $audDashPath -Raw
@@ -623,6 +624,7 @@ $audDashContent = Replace-Placeholders -Content $audDashContent -Tokens $tokens
 $audDashResult = Deploy-Item -WorkspaceId $WS_ID -DisplayName "Audience Votes" -Type "KQLDashboard" -Parts @(
     @{ path = "RealTimeDashboard.json"; payload = (Get-Base64String $audDashContent); payloadType = "InlineBase64" }
 )
+$VOTES_KQL_DASHBOARD_ID = $audDashResult.id
 
 # --- Step 11: Deploy Data Agent ---
 Write-Host "[11/16] Deploying Data Agent"
@@ -658,10 +660,14 @@ $DA_ID = $daResult.id
 Write-Host "[12/16] Deploying Org App"
 
 # Item elements bind by itemId + folderObjectId (the workspace id is the root folder).
-# NOTE: Org Apps do not currently accept Data Agents as item elements (the service
-# rejects itemType "DataAgent"/"AISkill"), so the app surfaces the report only; the
-# Data Agent is still deployed and can be used directly from the workspace.
-$tokens["REPORT_LOGICAL_ID"] = $REPORT_LOGICAL_ID
+# The DataAgent is surfaced as a direct link (not an itemType element) because the
+# service rejects itemType "DataAgent"/"AISkill".
+$tokens["REPORT_LOGICAL_ID"]    = $REPORT_LOGICAL_ID
+$tokens["LOGS_REPORT_ID"]       = $LOGS_REPORT_ID
+$tokens["LOGS_KQL_DASHBOARD_ID"] = $LOGS_KQL_DASHBOARD_ID
+$tokens["VOTES_KQL_DASHBOARD_ID"] = $VOTES_KQL_DASHBOARD_ID
+$tokens["DA_ID"]                = $DA_ID
+$tokens["SM_ID"]                = $SM_ID
 
 $orgAppPath = Join-Path $ScriptRoot "Aether\Aether App.OrgApp\definition.json"
 $orgAppContent = Get-Content $orgAppPath -Raw
@@ -828,8 +834,8 @@ Write-Host "  Semantic Model:   $SM_ID"
 Write-Host "  Investigation:    $INV_REPORT_ID"
 Write-Host "  Logs Report:      $LOGS_REPORT_ID"
 Write-Host "  Data Agent:       $DA_ID"
-Write-Host "  KQL Dashboard:    $($dashResult.id)"
-Write-Host "  Audience Votes:   $($audDashResult.id)"
+Write-Host "  KQL Dashboard:    $LOGS_KQL_DASHBOARD_ID"
+Write-Host "  Audience Votes:   $VOTES_KQL_DASHBOARD_ID"
 Write-Host "  Org App:          $($orgAppResult.id)"
 Write-Host "  Event Simulator:  $($simNb.id)"
 Write-Host "  Votes Logic App:  $LOGIC_APP_ID"

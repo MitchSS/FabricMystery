@@ -38,9 +38,69 @@
           "itemId": "{{REPORT_LOGICAL_ID}}",
           "folderObjectId": "{{WORKSPACE_ID}}",
           "displayName": "Aether Investigation"
+        },
+        {
+          "elementType": "item",
+          "elementId": "67b53eeb-d282-4bf6-9f5a-76b80832607e",
+          "itemType": "KQLDashboard",
+          "itemId": "{{LOGS_KQL_DASHBOARD_ID}}",
+          "folderObjectId": "{{WORKSPACE_ID}}",
+          "displayName": "Logs"
         }
       ],
       "displayName": "Investigation"
+    },
+    {
+      "elementType": "section",
+      "elementId": "6cfa67ad-2ee0-4c9d-a727-3905b5106cae",
+      "elements": [
+        {
+          "elementType": "item",
+          "elementId": "a1634366-98d4-45ce-bbf1-0b787b76c36e",
+          "itemType": "Report",
+          "itemId": "{{LOGS_REPORT_ID}}",
+          "folderObjectId": "{{WORKSPACE_ID}}",
+          "displayName": "Logs"
+        }
+      ],
+      "displayName": "Events"
+    },
+    {
+      "elementType": "section",
+      "elementId": "8a9ad894-30d0-4bfa-871f-bb5d8d864ded",
+      "elements": [
+        {
+          "elementType": "item",
+          "elementId": "2fe8485b-ea08-4bcd-92a0-878557dbeed0",
+          "itemType": "KQLDashboard",
+          "itemId": "{{VOTES_KQL_DASHBOARD_ID}}",
+          "folderObjectId": "{{WORKSPACE_ID}}",
+          "displayName": "Audience Votes"
+        }
+      ],
+      "displayName": "Audience Participation"
+    },
+    {
+      "elementType": "section",
+      "elementId": "63193a3b-d8f7-4c86-8a86-b3c01414c88a",
+      "elements": [
+        {
+          "elementType": "link",
+          "elementId": "d9b5696d-5a19-4248-854e-cdc86a1c0429",
+          "url": "https://app.fabric.microsoft.com/groups/{{WORKSPACE_ID}}/aiskills/{{DA_ID}}?experience=fabric-developer",
+          "linkType": "newtab",
+          "displayName": "Aether AI"
+        }
+      ],
+      "displayName": "Aether"
+    },
+    {
+      "elementType": "item",
+      "elementId": "c48ef01b-8791-409b-83ae-6c39d8c987f8",
+      "itemType": "SemanticModel",
+      "itemId": "{{SM_ID}}",
+      "folderObjectId": "{{WORKSPACE_ID}}",
+      "displayName": "dba15717-a16d-443e-a089-0f1b1a9e59e3"
     }
   ]
 }

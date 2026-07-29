@@ -1,16 +1,16 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.11.0/schema.json",
-  "name": "d309cd3000d02b95605a",
+  "name": "fed19cc09a70a816ed4b",
   "position": {
-    "x": 1119.2844364937389,
+    "x": 1094.1681574239713,
     "y": 0,
-    "z": 1000,
-    "height": 177.10196779964221,
-    "width": 161.00178890876566,
-    "tabOrder": 1000
+    "z": 1,
+    "height": 242.14669051878354,
+    "width": 159.71377459749553,
+    "tabOrder": 1
   },
   "visual": {
-    "visualType": "slicer",
+    "visualType": "listSlicer",
     "query": {
       "queryState": {
         "Values": {
@@ -20,14 +20,14 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "Communications"
+                      "Entity": "SecurityLogs"
                     }
                   },
-                  "Property": "Status"
+                  "Property": "Suspicious"
                 }
               },
-              "queryRef": "Communications.Status",
-              "nativeQueryRef": "Status",
+              "queryRef": "SecurityLogs.Suspicious",
+              "nativeQueryRef": "Suspicious",
               "active": true
             }
           ]
@@ -35,22 +35,24 @@
       }
     },
     "objects": {
-      "data": [
+      "selection": [
         {
           "properties": {
-            "mode": {
+            "selectAllCheckboxEnabled": {
               "expr": {
                 "Literal": {
-                  "Value": "'Basic'"
+                  "Value": "false"
+                }
+              }
+            },
+            "singleSelect": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
                 }
               }
             }
           }
-        }
-      ],
-      "general": [
-        {
-          "properties": {}
         }
       ]
     },
