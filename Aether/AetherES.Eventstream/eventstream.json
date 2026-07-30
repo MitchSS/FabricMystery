@@ -45,6 +45,11 @@
           }
         }
       },
+      "inputNodes": [
+        {
+          "name": "CommsFilter"
+        }
+      ]
     },
     {
       "name": "VotesDest",

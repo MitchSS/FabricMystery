@@ -725,8 +725,7 @@ else {
 Write-Host "[14/16] Deploying Event Simulator Notebook"
 
 $simPath = Join-Path $ScriptRoot "Admin\Event Simulator.Notebook\notebook.ipynb"
-$simContent = Get-Content $simPath -Raw
-$simContent = $simContent -replace '"id": ""', "`"id`": `"$LH_ID`""
+$simContent = Set-NotebookLakehouse -NotebookPath $simPath -LakehouseId $LH_ID -LakehouseName "AetherLH" -WorkspaceId $WS_ID
 if ($EVENTHUB_CONN) {
     # Literal replace (not -replace) so any regex-special chars in the key are safe.
     $simContent = $simContent.Replace("{{EVENTHUB_CONNECTION_STRING}}", $EVENTHUB_CONN)

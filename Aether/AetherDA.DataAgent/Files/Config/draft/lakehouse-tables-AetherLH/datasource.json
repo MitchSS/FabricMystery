@@ -1,7 +1,7 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/dataAgent/definition/dataSource/1.0.0/schema.json",
-  "artifactId": "0a5f30ae-4718-41b1-ae1d-35cf40184162",
-  "workspaceId": "79eb72f9-c580-4316-9f5f-e97b0f5b8365",
+  "artifactId": "{{LAKEHOUSE_ARTIFACT_ID}}",
+  "workspaceId": "{{WORKSPACE_ID}}",
   "dataSourceInstructions": null,
   "displayName": "AetherLH",
   "type": "lakehouse_tables",
