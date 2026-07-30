@@ -774,37 +774,70 @@ else {
         Write-Host "  WARNING: Could not parse EntityPath from the Eventstream connection string; skipping Logic App deploy."
     }
     else {
-        # Ensure the target resource group exists.
-        $rgExists = az group exists --name $ResourceGroup 2>$null
-        if ($rgExists -ne "true") {
-            Write-Host "  Creating resource group '$ResourceGroup' in '$Region'"
-            az group create --name $ResourceGroup --location $Region | Out-Null
+        # Preserve existing Logic App parameter values when caller omits them.
+        $effectiveVotesFormId = $VotesFormId
+        $effectiveVotesSuspectQuestionId = $VotesSuspectQuestionId
+        $effectiveVotesVoteSectionQuestionId = $VotesVoteSectionQuestionId
+        $effectiveVotesNameQuestionId = $VotesNameQuestionId
+
+        try {
+            $existingWorkflowJson = az resource show `
+                --resource-group $ResourceGroup `
+                --name "aether-votes-logicapp" `
+                --resource-type "Microsoft.Logic/workflows" `
+                -o json 2>$null
+
+            if ($LASTEXITCODE -eq 0 -and $existingWorkflowJson) {
+                $existingWorkflow = $existingWorkflowJson | ConvertFrom-Json
+                $existingParams = $existingWorkflow.properties.parameters
+
+                if (-not $effectiveVotesFormId) { $effectiveVotesFormId = $existingParams.formId.value }
+                if (-not $effectiveVotesSuspectQuestionId) { $effectiveVotesSuspectQuestionId = $existingParams.suspectQuestionId.value }
+                if (-not $effectiveVotesVoteSectionQuestionId) { $effectiveVotesVoteSectionQuestionId = $existingParams.voteSectionQuestionId.value }
+                if (-not $effectiveVotesNameQuestionId) { $effectiveVotesNameQuestionId = $existingParams.nameQuestionId.value }
+            }
+        }
+        catch {
+            Write-Host "  WARNING: Could not read existing Logic App parameter values; proceeding with provided values only."
         }
 
-        $bicepPath = Join-Path $ScriptRoot "infra\votes-logicapp.bicep"
-        Write-Host "  Deploying Logic App + API connections via Bicep"
-        $deployName = "aether-votes-$([DateTime]::UtcNow.ToString('yyyyMMddHHmmss'))"
-        $deployOut = az deployment group create `
-            --name $deployName `
-            --resource-group $ResourceGroup `
-            --template-file $bicepPath `
-            --parameters `
-                location=$Region `
-                eventHubConnectionString=$EVENTHUB_CONN `
-                eventHubName=$eventHubName `
-                formId=$VotesFormId `
-                suspectQuestionId=$VotesSuspectQuestionId `
-                voteSectionQuestionId=$VotesVoteSectionQuestionId `
-                nameQuestionId=$VotesNameQuestionId `
-            --query "properties.outputs" -o json 2>&1
-
-        if ($LASTEXITCODE -eq 0) {
-            try { $LOGIC_APP_ID = ($deployOut | ConvertFrom-Json).logicAppResourceId.value } catch { }
-            Write-Host "  Deployed: Audience Votes Logic App -> $LOGIC_APP_ID"
+        if (-not $effectiveVotesFormId) {
+            Write-Host "  WARNING: VotesFormId is empty; skipping Logic App deploy to avoid breaking the Forms trigger."
+            Write-Host "           Re-run with -VotesFormId '<long-form-id>' to deploy/repair the Audience Votes flow."
         }
         else {
-            Write-Host "  WARNING: Logic App deployment failed:"
-            Write-Host "  $deployOut"
+            # Ensure the target resource group exists.
+            $rgExists = az group exists --name $ResourceGroup 2>$null
+            if ($rgExists -ne "true") {
+                Write-Host "  Creating resource group '$ResourceGroup' in '$Region'"
+                az group create --name $ResourceGroup --location $Region | Out-Null
+            }
+
+            $bicepPath = Join-Path $ScriptRoot "infra\votes-logicapp.bicep"
+            Write-Host "  Deploying Logic App + API connections via Bicep"
+            $deployName = "aether-votes-$([DateTime]::UtcNow.ToString('yyyyMMddHHmmss'))"
+            $deployOut = az deployment group create `
+                --name $deployName `
+                --resource-group $ResourceGroup `
+                --template-file $bicepPath `
+                --parameters `
+                    location=$Region `
+                    eventHubConnectionString=$EVENTHUB_CONN `
+                    eventHubName=$eventHubName `
+                    formId=$effectiveVotesFormId `
+                    suspectQuestionId=$effectiveVotesSuspectQuestionId `
+                    voteSectionQuestionId=$effectiveVotesVoteSectionQuestionId `
+                    nameQuestionId=$effectiveVotesNameQuestionId `
+                --query "properties.outputs" -o json 2>&1
+
+            if ($LASTEXITCODE -eq 0) {
+                try { $LOGIC_APP_ID = ($deployOut | ConvertFrom-Json).logicAppResourceId.value } catch { }
+                Write-Host "  Deployed: Audience Votes Logic App -> $LOGIC_APP_ID"
+            }
+            else {
+                Write-Host "  WARNING: Logic App deployment failed:"
+                Write-Host "  $deployOut"
+            }
         }
     }
 }
