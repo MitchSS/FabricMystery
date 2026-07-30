@@ -14,6 +14,24 @@
 | **Public repo (for images)** | Character portraits are served from `raw.githubusercontent.com`, so the repo (or your fork) must be **public** for images to render. See [Character Images](#character-images). |
 | **Microsoft Forms** | A public form for audience voting (optional) |
 
+### Pre-deployment (Audience Votes form)
+
+If you want a full end-to-end deployment of Audience Votes, create the Microsoft Form before running `deploy.ps1` and use these exact questions/options:
+
+1. **Vote Section** (required)
+   - Section 1
+   - Section 2
+   - Section 3
+   - Final Vote
+2. **Suspect** (required)
+   - Evelyn Reed
+   - Marcus Thorne
+   - Anya Sharma
+   - Dr. Alistair Finch
+   - No one right now
+
+Then pass `-VotesFormId`, `-VotesSuspectQuestionId`, and `-VotesVoteSectionQuestionId` to `deploy.ps1`.
+
 ## Deployment
 
 The included `deploy.ps1` script creates the core Fabric items in the correct dependency order using the Fabric REST API. It also deploys an Azure Logic App (Consumption) that streams Microsoft Forms votes into the Eventhouse. A small amount of post-deployment portal setup (authorizing the Forms connection) is still required.
@@ -97,8 +115,8 @@ Once the script completes:
    Forms' *Get response details* returns answers keyed by **question id**, not friendly names, and you can't know those ids until one response exists — so the reliable order is: set the form id → authorize → submit one test → read the ids from the run → paste them in.
 
    1. **Create the form.** Two questions:
-      - **Vote Section** — the voting round (e.g. a choice question with "Round 1", "Final Vote").
-      - **Suspect** — "Who did it?" (choice: Evelyn Reed, Marcus Thorne, Anya Sharma, Dr. Alistair Finch).
+      - **Vote Section** — choices: Section 1, Section 2, Section 3, Final Vote.
+      - **Suspect** — choices: Evelyn Reed, Marcus Thorne, Anya Sharma, Dr. Alistair Finch, No one right now.
 
       Set the form to **accept anonymous responses** ("Anyone can respond" — no sign-in required), so audience members can vote from any device without a Microsoft account. Because there's no name question, votes are stored with `VoterName = anonymous`.
    2. **Get the form id.** Open the form in the Forms editor; in the browser URL, copy the value between `id=` and the next `&`. That's `formId`.
