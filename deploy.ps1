@@ -773,32 +773,12 @@ else {
         Write-Host "  WARNING: Could not parse EntityPath from the Eventstream connection string; skipping Logic App deploy."
     }
     else {
-        # Preserve existing Logic App parameter values when caller omits them.
+        # Use only caller-provided values. Do not read/rehydrate existing workflow
+        # parameters from Azure to avoid carrying forward potentially sensitive ids.
         $effectiveVotesFormId = $VotesFormId
         $effectiveVotesSuspectQuestionId = $VotesSuspectQuestionId
         $effectiveVotesVoteSectionQuestionId = $VotesVoteSectionQuestionId
         $effectiveVotesNameQuestionId = $VotesNameQuestionId
-
-        try {
-            $existingWorkflowJson = az resource show `
-                --resource-group $ResourceGroup `
-                --name "aether-votes-logicapp" `
-                --resource-type "Microsoft.Logic/workflows" `
-                -o json 2>$null
-
-            if ($LASTEXITCODE -eq 0 -and $existingWorkflowJson) {
-                $existingWorkflow = $existingWorkflowJson | ConvertFrom-Json
-                $existingParams = $existingWorkflow.properties.parameters
-
-                if (-not $effectiveVotesFormId) { $effectiveVotesFormId = $existingParams.formId.value }
-                if (-not $effectiveVotesSuspectQuestionId) { $effectiveVotesSuspectQuestionId = $existingParams.suspectQuestionId.value }
-                if (-not $effectiveVotesVoteSectionQuestionId) { $effectiveVotesVoteSectionQuestionId = $existingParams.voteSectionQuestionId.value }
-                if (-not $effectiveVotesNameQuestionId) { $effectiveVotesNameQuestionId = $existingParams.nameQuestionId.value }
-            }
-        }
-        catch {
-            Write-Host "  WARNING: Could not read existing Logic App parameter values; proceeding with provided values only."
-        }
 
         if (-not $effectiveVotesFormId) {
             Write-Host "  WARNING: VotesFormId is empty; skipping Logic App deploy to avoid breaking the Forms trigger."

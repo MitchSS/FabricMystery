@@ -27,6 +27,14 @@ cd FabricMystery
 
 # Deploy to a new workspace (uses your existing az login session)
 .\deploy.ps1 -WorkspaceName "Fabric Mystery Demo" -CapacityId "<your-capacity-guid>"
+
+# Full end-to-end deploy (includes Audience Votes wiring)
+.\deploy.ps1 `
+  -WorkspaceName "Fabric Mystery Demo" `
+  -CapacityId "<your-capacity-guid>" `
+  -VotesFormId "<forms-long-id>" `
+  -VotesSuspectQuestionId "<suspect-question-id>" `
+  -VotesVoteSectionQuestionId "<vote-section-question-id>"
 ```
 
 ### Parameters
@@ -37,10 +45,14 @@ cd FabricMystery
 | `-CapacityId` | No* | `""` | Fabric capacity GUID. *Required when creating a new workspace. |
 | `-ResourceGroup` | No | `"rg-fabricmystery"` | Azure resource group for the Audience Votes Logic App. Created if it doesn't exist. |
 | `-Region` | No | `"uksouth"` | Azure region for the Logic App and its API connections. |
-| `-VotesFormId` | No | `""` | Microsoft Forms form id (long id from the form edit URL). Can be bound later in the Logic App designer. |
-| `-VotesSuspectQuestionId` | No | `""` | Forms question id for the Suspect vote. Can be bound later in the designer. |
-| `-VotesVoteSectionQuestionId` | No | `""` | Forms question id for the Vote Section / voting round (e.g. "Final Vote"). |
+| `-VotesFormId` | No** | `""` | Microsoft Forms form id (long id from the form edit URL). **Required for full end-to-end deployment of Audience Votes.** If omitted, Logic App deployment is skipped. |
+| `-VotesSuspectQuestionId` | No** | `""` | Forms question id for the Suspect vote. **Required for full end-to-end Audience Votes wiring.** |
+| `-VotesVoteSectionQuestionId` | No** | `""` | Forms question id for the Vote Section / voting round (e.g. "Final Vote"). **Required for full end-to-end Audience Votes wiring.** |
 | `-VotesNameQuestionId` | No | `""` | *Optional / unused by the demo form.* Forms question id for a voter Name. Left blank, votes are recorded as `anonymous`. |
+
+> \* `-CapacityId` is required when creating a new workspace.
+>
+> \** `-VotesFormId`, `-VotesSuspectQuestionId`, and `-VotesVoteSectionQuestionId` are required only if you want Audience Votes fully configured during deployment (no post-deploy parameter editing).
 
 ### What the Script Does (16 Steps)
 
@@ -71,7 +83,9 @@ Once the script completes:
 
 2. **Audience Voting (Real-Time via Logic App)** — The live voting pipeline uses a Microsoft Form → Azure Logic App → Eventstream → Eventhouse `Votes` table → `Audience Votes` dashboard. This pattern is credited to [liamhowlett/fabric-rti-livesurvey](https://github.com/liamhowlett/fabric-rti-livesurvey).
 
-   The Logic App (`aether-votes-logicapp`) is deployed fully wired **except** for the form-specific values it reads as workflow parameters. You supply these once — either through the portal (below) or by re-running `deploy.ps1` with the matching switches.
+   The Logic App (`aether-votes-logicapp`) is deployed fully wired **except** for the form-specific values it reads as workflow parameters. You supply these once — either through the portal (below) or by re-running `deploy.ps1` with the matching switches. If `-VotesFormId` is omitted, the script skips Logic App deployment to avoid publishing a broken Forms trigger.
+   
+   > Privacy note: `deploy.ps1` uses only values passed via `-Votes*` parameters and does **not** read/reuse existing Form/question IDs from an already deployed Logic App.
 
    | Parameter | What it is | `deploy.ps1` switch |
    |-----------|------------|---------------------|
