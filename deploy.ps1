@@ -439,6 +439,37 @@ foreach ($cmd in $commands) {
     Write-Host "  Executed: $($cmd.Substring(0, [Math]::Min(60, $cmd.Length)))..."
 }
 
+# Seed the static KQL tables. .set-or-replace keeps repeated deployments idempotent.
+$staticDataCommands = @(
+    @{
+        Name = "VictimCalendar"
+        Csl = @'
+.set-or-replace VictimCalendar <|
+datatable (StartTime: datetime, EndTime: datetime, Subject: string, Attendees: dynamic, Status: string)
+[
+    datetime(2025-10-06T16:00:00Z), datetime(2025-10-06T17:00:00Z), "Merger Discussion: Aetherium & Nexus Dynamics", dynamic(["Julian Croft", "Anya Sharma"]), "Confirmed",
+    datetime(2025-10-08T09:00:00Z), datetime(2025-10-08T10:00:00Z), "Follow-up: MedSolutions Experimental Trial Shipment", dynamic(["Julian Croft"]), "Deleted"
+]
+'@
+    },
+    @{
+        Name = "SupplierRecords"
+        Csl = @'
+.set-or-replace SupplierRecords <|
+datatable (OrderDate: datetime, Supplier: string, ItemCode: string, ItemDescription: string, Quantity: int, Notes: string)
+[
+    datetime(2025-09-12T00:00:00Z), "QuantumChip Co.", "QC-GPU-9980", "GPU Cluster Upgrade", 32, "Standard procurement",
+    datetime(2025-09-15T00:00:00Z), "BioMed Solutions", "EXP-HTD-42", "Experimental Cardiotropic Drug (NDA)", 1, "Rush delivery for A.F. Patient confidential."
+]
+'@
+    }
+)
+foreach ($seed in $staticDataCommands) {
+    Invoke-FabricApi -Method "POST" -Url "$CLUSTER_URI/v1/rest/mgmt" `
+        -Body @{ csl = $seed.Csl.Trim(); db = "AetherEH" } -Resource $CLUSTER_URI
+    Write-Host "  Seeded static data: $($seed.Name)"
+}
+
 # Enable OneLake availability on the tables that are exposed to the Lakehouse via
 # shortcuts. Without this policy, the KQL table has no OneLake (Tables/<name>) path
 # for a shortcut to target.
