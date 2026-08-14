@@ -2,6 +2,10 @@
 
 > A murder mystery game built entirely on Microsoft Fabric. Players investigate a tech billionaire's death using Power BI reports, real-time log analysis, and an AI assistant that retrieves facts but never accuses.
 
+## Presentation
+
+The companion speaker deck, [GhostInTheAether.pptx](GhostInTheAether.pptx), provides the complete session flow: investigation setup, audience voting checkpoints, realtime and enriched clues, Ask Aether prompts, architecture, reusable industry patterns, and the final reveal.
+
 ## Prerequisites
 
 | Requirement | Notes |
@@ -166,8 +170,6 @@ For a completely clean slate, delete the workspace in the Fabric portal (or via 
 ```powershell
 .\deploy.ps1 -WorkspaceName "Fabric Mystery Demo" -CapacityId "<your-capacity-guid>"
 ```
-
-> Note: re-running rewrites the `AetherES` Eventstream definition. If you've already wired the Audience Votes Logic App to the Eventstream's Event Hub endpoint, verify the connection still works after a redeploy (the endpoint's connection string can rotate).
 
 ## Troubleshooting
 
