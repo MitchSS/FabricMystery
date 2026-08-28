@@ -198,6 +198,10 @@ AutoTest.Net/
 
 # DocProject is a documentation generator add-in
 DocProject/buildhelp/
+
+# Local blog drafting files
+/BLOG_OUTLINE.md
+/BLOG_POST.md
 DocProject/Help/*.HxT
 DocProject/Help/*.HxC
 DocProject/Help/*.hhc
